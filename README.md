@@ -45,6 +45,7 @@ frequency in MHz of the analog carrier of interest.
 
 Both graphs (demodulator + decoder) are connected with a ZMQ pipe, it needs TCP port 5555 available on localhost.
 
+
 ##Demodulation notes
 
 For best results adjust both "L carrier fine" and "R carrier fine" to match 
@@ -61,6 +62,7 @@ If you close the demodulator, you will need to restart the CX decoder too.
 
 Using the gr-pipe might hang the demodulator when the GUI is closed. 
 Kill the ld-ldf-reader process first to avoid that.
+
 
 ##Output comparision
 
