@@ -60,6 +60,7 @@ Using the gr-pipe might hang the demodulator when the GUI is closed.
 Kill the ld-ldf-reader process first to avoid that.
 
 ##Output comparision
+
 The demodulator produces a "demodulated_hifi.wav"
 
 The CX decoder produces a "CX_decoded_output.wav"
