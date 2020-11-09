@@ -7,9 +7,11 @@ demodulates the analog FM carriers, and then translates it into a 16bit 192kHz s
 Additionally it has a prototype of the CX noise reduction decoder.
 
 ## Audio demodulator GUI
+
 ![Demodulator GUI](screenshots/sh_decoder.png)
 
 ## Audio CX decoder prototype
+
 ![CX Decoder GUI](screenshots/cx_decoder.png)
 
 ##Requirements
@@ -21,6 +23,7 @@ ld-ldf-reader from [ld-decode](https://github.com/happycube/ld-decode)
 [gr-pipe](https://github.com/jolivain/gr-pipe) (recommended)
 
 ## How to use (from a pre-recorded image):
+
 1) Convert the .oga format into raw r16 with ld-ldf-reader 
 
 example: 
