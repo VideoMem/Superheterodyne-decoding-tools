@@ -247,7 +247,7 @@ blocks:
     start: -10e3
     step: '0.1'
     stop: 10e3
-    value: '-1987'
+    value: '-10000'
     widget: counter_slider
   states:
     bus_sink: false
@@ -1806,7 +1806,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    command: ld-ldf-reader ~/vault/optics.part.ldf
+    command: ld-ldf-reader /home/sebastian/Downloads/VTR/LD/GulliversTravels_Side1.ldf.part.oga
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'

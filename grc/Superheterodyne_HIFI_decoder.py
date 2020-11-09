@@ -93,7 +93,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.pop_len = pop_len = audio_rate*(pop_time/2)
         self.op_VCO_deviation = op_VCO_deviation = VCO_deviation/3
         self.left_balance = left_balance = 1 - balance
-        self.center_freq = center_freq = -1987
+        self.center_freq = center_freq = -10000
         self.carrierR_fine = carrierR_fine = -112
         self.carrierL_fine = carrierL_fine = 0
         self.R_carrier_ref = R_carrier_ref = 178.75 * Fh
@@ -392,7 +392,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/vault/optics.part.ldf')
+        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader /home/sebastian/Downloads/VTR/LD/GulliversTravels_Side1.ldf.part.oga')
         self.low_pass_filter_1_0 = filter.fir_filter_fff(
             1,
             firdes.low_pass(
@@ -486,7 +486,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.freq_xlating_fir_filter_xxx_0_0 = filter.freq_xlating_fir_filter_ccc(1, [1], R_carrier, if_rate)
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, [1], L_carrier, if_rate)
         self.dc_blocker_xx_0 = filter.dc_blocker_ff(round(samp_rate/100), True)
-        self._center_freq_range = Range(-10e3, 10e3, 0.1, -1987, 300)
+        self._center_freq_range = Range(-10e3, 10e3, 0.1, -10000, 300)
         self._center_freq_win = RangeWidget(self._center_freq_range, self.set_center_freq, 'Center Fine', "counter_slider", float)
         self.tabs_grid_layout_0.addWidget(self._center_freq_win, 0, 0, 1, 1)
         for r in range(0, 1):
