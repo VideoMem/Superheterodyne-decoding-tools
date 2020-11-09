@@ -13,6 +13,7 @@ Additionally it has a prototype of the CX noise reduction decoder.
 ![CX Decoder GUI](screenshots/cx_decoder.png)
 
 ##Requirements
+
 GNU Radio + Python 3 (tested with gnuradio-companion 3.8.1.0 (Python 3.6.9))
 
 ld-ldf-reader from [ld-decode](https://github.com/happycube/ld-decode)
