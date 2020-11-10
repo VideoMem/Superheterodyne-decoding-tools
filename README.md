@@ -6,13 +6,6 @@ demodulates the analog FM carriers, and then translates it into a 16bit 192kHz s
 
 Additionally it has a prototype of the CX noise reduction decoder.
 
-## Audio demodulator GUI
-
-![Demodulator GUI](screenshots/sh_decoder.png)
-
-## Audio CX decoder prototype
-
-![CX Decoder GUI](screenshots/cx_decoder.png)
 
 ##Requirements
 
@@ -72,4 +65,11 @@ The CX decoder produces a "CX_decoded_output.wav"
 
 Thanks for testing it!
 
+## Audio demodulator GUI
+
+![Demodulator GUI](screenshots/sh_decoder.png)
+
+## Audio CX decoder prototype
+
+![CX Decoder GUI](screenshots/cx_decoder.png)
 
