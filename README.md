@@ -6,8 +6,15 @@ demodulates the analog FM carriers, and then translates it into a 16bit 192kHz s
 
 Additionally it has a prototype of the CX noise reduction decoder.
 
+## Audio demodulator GUI
 
-##Requirements
+![Demodulator GUI](screenshots/sh_decoder.png)
+
+## Audio CX decoder prototype
+
+![CX Decoder GUI](screenshots/cx_decoder.png)
+
+## Requirements
 
 GNU Radio + Python 3 (tested with gnuradio-companion 3.8.1.0 (Python 3.6.9))
 
@@ -39,7 +46,7 @@ frequency in MHz of the analog carrier of interest.
 Both graphs (demodulator + decoder) are connected with a ZMQ pipe, it needs TCP port 5555 available on localhost.
 
 
-##Demodulation notes
+## Demodulation notes
 
 For best results adjust both "L carrier fine" and "R carrier fine" to match 
 the carrier peaks for that particular recording.
@@ -57,7 +64,7 @@ Using the gr-pipe might hang the demodulator when the GUI is closed.
 Kill the ld-ldf-reader process first to avoid that.
 
 
-##Output comparision
+## Output comparision
 
 The demodulator produces a "demodulated_hifi.wav"
 
@@ -65,11 +72,4 @@ The CX decoder produces a "CX_decoded_output.wav"
 
 Thanks for testing it!
 
-## Audio demodulator GUI
-
-![Demodulator GUI](screenshots/sh_decoder.png)
-
-## Audio CX decoder prototype
-
-![CX Decoder GUI](screenshots/cx_decoder.png)
 
