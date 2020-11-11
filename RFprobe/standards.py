@@ -8,4 +8,5 @@ class LDCarriers:
         values = list()
         values.append(('L', 146.25 * self.fh))
         values.append(('R', 178.75 * self.fh))
+
         return values
