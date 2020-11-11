@@ -263,7 +263,7 @@ blocks:
     start: '0'
     step: '0.01'
     stop: '2'
-    value: '1'
+    value: '0.5'
     widget: counter_slider
   states:
     bus_sink: false
@@ -2035,11 +2035,11 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    file: NASA_optics.wav
+    file: vhs_hifi_test.wav
     maxoutbuf: '0'
     minoutbuf: '0'
     nchan: '2'
-    repeat: 'True'
+    repeat: 'False'
   states:
     bus_sink: false
     bus_source: false

@@ -83,7 +83,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         ##################################################
         self.samp_rate = samp_rate = 192e3
         self.decimation = decimation = 4
-        self.volume = volume = 1
+        self.volume = volume = 0.5
         self.tp1_gain = tp1_gain = 0.52
         self.test_tone_enable = test_tone_enable = 0.0
         self.test_gain = test_gain = 1
@@ -112,7 +112,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.tabs.addTab(self.tabs_widget_1, 'Advanced')
         self.top_grid_layout.addWidget(self.tabs)
         self.envelope_probe = blocks.probe_signal_f()
-        self._volume_range = Range(0, 2, 0.01, 1, 200)
+        self._volume_range = Range(0, 2, 0.01, 0.5, 200)
         self._volume_win = RangeWidget(self._volume_range, self.set_volume, 'Volume', "counter_slider", float)
         self.top_grid_layout.addWidget(self._volume_win)
         self._tp1_gain_range = Range(0, 2, 0.01, 0.52, 200)
