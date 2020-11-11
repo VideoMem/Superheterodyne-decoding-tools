@@ -94,7 +94,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.ctrl_rate = ctrl_rate = round(samp_rate/decimation)
         self.ctrl_gain = ctrl_gain = 1
         self.ctrl_envelope = ctrl_envelope = 1
-        self.ctrl_delay = ctrl_delay = 8748
+        self.ctrl_delay = ctrl_delay = 7721
 
         ##################################################
         # Blocks
@@ -150,7 +150,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         _ctrl_envelope_thread.daemon = True
         _ctrl_envelope_thread.start()
 
-        self._ctrl_delay_range = Range(0, 40e3, 1, 8748, 200)
+        self._ctrl_delay_range = Range(0, 40e3, 1, 7721, 200)
         self._ctrl_delay_win = RangeWidget(self._ctrl_delay_range, self.set_ctrl_delay, 'Control Delay', "counter_slider", float)
         self.tabs_layout_1.addWidget(self._ctrl_delay_win)
         self.zeromq_req_source_0 = zeromq.req_source(gr.sizeof_gr_complex, 1, 'tcp://localhost:5555', 1000, False, -1)
@@ -404,8 +404,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.analog_fm_preemph_1 = analog.fm_preemph(fs=ctrl_rate, tau=30e-3, fh=-1.0)
         self.analog_fm_deemph_0_1_0 = analog.fm_deemph(fs=ctrl_rate, tau=200e-3)
         self.analog_fm_deemph_0_1 = analog.fm_deemph(fs=ctrl_rate, tau=30e-3)
-        self.analog_fm_deemph_0_0_0 = analog.fm_deemph(fs=ctrl_rate, tau=10e-3)
-        self.analog_fm_deemph_0_0 = analog.fm_deemph(fs=ctrl_rate, tau=1e-3)
+        self.analog_fm_deemph_0_0_0 = analog.fm_deemph(fs=ctrl_rate, tau=2.5e-3)
+        self.analog_fm_deemph_0_0 = analog.fm_deemph(fs=ctrl_rate, tau=250e-6)
         self.analog_const_source_x_2_1 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 1-test_tone_enable)
         self.analog_const_source_x_2 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, test_tone_enable)
         self.analog_const_source_x_1 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 1)

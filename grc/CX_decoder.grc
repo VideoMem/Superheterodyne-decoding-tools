@@ -44,7 +44,7 @@ blocks:
     start: '0'
     step: '1'
     stop: 40e3
-    value: '8748'
+    value: '7721'
     widget: counter_slider
   states:
     bus_sink: false
@@ -269,7 +269,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1104, 16.0]
+    coordinate: [1080, 20.0]
     rotation: 0
     state: enabled
 - name: analog_const_source_x_0
@@ -349,7 +349,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: ctrl_rate
-    tau: 1e-3
+    tau: 250e-6
   states:
     bus_sink: false
     bus_source: false
@@ -366,7 +366,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: ctrl_rate
-    tau: 10e-3
+    tau: '2.5e-3'
   states:
     bus_sink: false
     bus_source: false
