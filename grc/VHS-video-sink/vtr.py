@@ -89,7 +89,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.interpolator = interpolator = 2
         self.samp_rate = samp_rate = in_rate*interpolator
         self.luma_fm_carrier = luma_fm_carrier = Fh * (284-1/4) + Fh/625
-        self.lines_per_frame = lines_per_frame = 624
+        self.lines_per_frame = lines_per_frame = 625
         self.if_lo_reference_fc = if_lo_reference_fc = 40*Fh+(Fh/8)
         self.disp_width = disp_width = nearest.power(samples_per_line,2)/2
         self.chroma_fine = chroma_fine = 0

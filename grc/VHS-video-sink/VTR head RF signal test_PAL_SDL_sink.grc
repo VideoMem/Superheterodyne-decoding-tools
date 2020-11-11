@@ -354,7 +354,7 @@ blocks:
     comment: '625 (PAL)
 
       525 (NTSC)'
-    value: '624'
+    value: '625'
   states:
     bus_sink: false
     bus_source: false
