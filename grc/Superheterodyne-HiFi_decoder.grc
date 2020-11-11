@@ -500,7 +500,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1408, 492.0]
+    coordinate: [1560, 492.0]
     rotation: 0
     state: enabled
 - name: analog_agc2_xx_0_0
@@ -824,6 +824,24 @@ blocks:
     coordinate: [408, 1092.0]
     rotation: 0
     state: true
+- name: blocks_add_const_vxx_0
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '-0.5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 508.0]
+    rotation: 0
+    state: true
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -857,7 +875,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2208, 384.0]
+    coordinate: [2032, 384.0]
     rotation: 0
     state: enabled
 - name: blocks_add_xx_2
@@ -896,6 +914,23 @@ blocks:
     coordinate: [768, 2712.0]
     rotation: 0
     state: true
+- name: blocks_char_to_float_0
+  id: blocks_char_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 8 bit capture
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: 1/0xFF
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 436.0]
+    rotation: 0
+    state: disabled
 - name: blocks_complex_to_real_0
   id: blocks_complex_to_real
   parameters:
@@ -909,7 +944,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2336, 400.0]
+    coordinate: [2160, 400.0]
     rotation: 0
     state: enabled
 - name: blocks_delay_0
@@ -985,7 +1020,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 512.0]
+    coordinate: [1320, 512.0]
     rotation: 0
     state: true
 - name: blocks_float_to_complex_1
@@ -1112,6 +1147,24 @@ blocks:
     coordinate: [928, 2724.0]
     rotation: 0
     state: true
+- name: blocks_multiply_const_vxx_4
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '0.001'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2352, 396.0]
+    rotation: 0
+    state: true
 - name: blocks_null_source_0
   id: blocks_null_source
   parameters:
@@ -1199,21 +1252,21 @@ blocks:
     coordinate: [880, 1724.0]
     rotation: 0
     state: true
-- name: blocks_short_to_float_0
+- name: blocks_short_to_float_0_0
   id: blocks_short_to_float
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: 10+ bit capture
     maxoutbuf: '0'
     minoutbuf: '0'
-    scale: '1'
+    scale: 1/0xFFFF
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 508.0]
+    coordinate: [408, 508.0]
     rotation: 0
     state: enabled
 - name: blocks_threshold_ff_0
@@ -1284,7 +1337,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 500.0]
+    coordinate: [840, 500.0]
     rotation: 0
     state: enabled
 - name: freq_xlating_fir_filter_xxx_0
@@ -1504,7 +1557,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    command: ld-ldf-reader ~/vault/Karaoke_1_CLV_NTSC.part.ldf
+    command: ld-ldf-reader /home/sebastian/Downloads/VTR/LD/AC3.ldf
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1801,7 +1854,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 484.0]
+    coordinate: [1064, 484.0]
     rotation: 0
     state: enabled
 - name: rational_resampler_xxx_1
@@ -1888,7 +1941,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1656, 524.0]
+    coordinate: [1808, 524.0]
     rotation: 0
     state: true
 - name: virtual_sink_0_0
@@ -1901,7 +1954,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 412.0]
+    coordinate: [808, 420.0]
     rotation: 0
     state: true
 - name: virtual_sink_1
@@ -2135,7 +2188,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1984, 360.0]
+    coordinate: [1808, 364.0]
     rotation: 0
     state: enabled
 - name: virtual_source_4
@@ -2148,7 +2201,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1984, 424.0]
+    coordinate: [1808, 428.0]
     rotation: 0
     state: enabled
 - name: virtual_source_8
@@ -2249,14 +2302,17 @@ connections:
 - [band_pass_filter_0, '0', virtual_sink_3, '0']
 - [band_pass_filter_0_0, '0', freq_xlating_fir_filter_xxx_0_0, '0']
 - [band_pass_filter_0_0, '0', virtual_sink_2, '0']
+- [blocks_add_const_vxx_0, '0', dc_blocker_xx_0, '0']
+- [blocks_add_const_vxx_0, '0', virtual_sink_0_0, '0']
 - [blocks_add_xx_0, '0', qtgui_number_sink_0_1_1, '0']
 - [blocks_add_xx_1, '0', blocks_complex_to_real_0, '0']
 - [blocks_add_xx_2, '0', blocks_multiply_const_vxx_3, '0']
 - [blocks_add_xx_2_0, '0', blocks_multiply_const_vxx_3_0, '0']
-- [blocks_complex_to_real_0, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_char_to_float_0, '0', blocks_add_const_vxx_0, '0']
+- [blocks_complex_to_real_0, '0', blocks_multiply_const_vxx_4, '0']
 - [blocks_delay_0, '0', blocks_add_xx_2, '1']
 - [blocks_delay_0_0, '0', blocks_add_xx_2_0, '1']
-- [blocks_file_source_0, '0', blocks_short_to_float_0, '0']
+- [blocks_file_source_0, '0', blocks_short_to_float_0_0, '0']
 - [blocks_float_to_complex_0, '0', analog_agc2_xx_0, '0']
 - [blocks_float_to_complex_1, '0', zeromq_rep_sink_0, '0']
 - [blocks_multiply_const_vxx_0, '0', virtual_sink_1, '0']
@@ -2265,13 +2321,13 @@ connections:
 - [blocks_multiply_const_vxx_2, '0', qtgui_number_sink_0_1, '1']
 - [blocks_multiply_const_vxx_3, '0', virtual_sink_6, '0']
 - [blocks_multiply_const_vxx_3_0, '0', virtual_sink_7, '0']
-- [blocks_null_source_0, '0', blocks_short_to_float_0, '0']
+- [blocks_multiply_const_vxx_4, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_null_source_0, '0', blocks_short_to_float_0_0, '0']
 - [blocks_rms_xx_0, '0', blocks_multiply_const_vxx_1, '0']
 - [blocks_rms_xx_0_0, '0', blocks_multiply_const_vxx_2, '0']
 - [blocks_rms_xx_0_0_0, '0', blocks_threshold_ff_0_0, '0']
 - [blocks_rms_xx_0_2, '0', blocks_threshold_ff_0, '0']
-- [blocks_short_to_float_0, '0', dc_blocker_xx_0, '0']
-- [blocks_short_to_float_0, '0', virtual_sink_0_0, '0']
+- [blocks_short_to_float_0_0, '0', blocks_add_const_vxx_0, '0']
 - [blocks_threshold_ff_0, '0', LS_signal, '0']
 - [blocks_threshold_ff_0, '0', blocks_add_xx_0, '0']
 - [blocks_threshold_ff_0_0, '0', RS_signal, '0']
@@ -2287,7 +2343,7 @@ connections:
 - [low_pass_filter_0_0_0, '0', virtual_sink_1_0_0, '0']
 - [low_pass_filter_0_1, '0', blocks_multiply_const_vxx_0, '0']
 - [low_pass_filter_0_1, '0', virtual_sink_1_1, '0']
-- [pipe_source_1, '0', blocks_short_to_float_0, '0']
+- [pipe_source_1, '0', blocks_short_to_float_0_0, '0']
 - [rational_resampler_xxx_0, '0', blocks_float_to_complex_0, '0']
 - [rational_resampler_xxx_1, '0', low_pass_filter_0_0, '0']
 - [rational_resampler_xxx_1_0, '0', low_pass_filter_0, '0']
