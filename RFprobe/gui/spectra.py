@@ -24,7 +24,7 @@ class GUIspectra(QMainWindow):
         self.createActions()
         self.createMenus()
 
-        self.setWindowTitle("Image Viewer")
+        self.setWindowTitle("Spectra Viewer")
         self.resize(500, 400)
 
 
