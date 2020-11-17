@@ -93,7 +93,7 @@ class FFTtools:
         s, (width, height) = canvas.print_to_buffer()
         X = np.fromstring(s, np.uint8).reshape((height, width, 4))
         plt.close('all')
-        return X
+        return X.tobytes(), width, height
         #q.put(X)
         #plt.savefig
         #plt.show()

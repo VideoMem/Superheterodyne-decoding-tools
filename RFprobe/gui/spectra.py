@@ -1,7 +1,8 @@
-from PyQt5.QtGui import QPalette, QPixmap
+from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtGui import QPalette, QPixmap, QImage
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMainWindow, QMenu, QAction
-
+import numpy as np
 
 class GUIspectra(QMainWindow):
 
@@ -15,6 +16,7 @@ class GUIspectra(QMainWindow):
         self.imageLabel.setBackgroundRole(QPalette.Base)
         self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
+        self.imageLabel.setGeometry(QRect(0, 0, 640, 480))
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setBackgroundRole(QPalette.Dark)
@@ -77,9 +79,14 @@ class GUIspectra(QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
-    def publish(self, data):
-        print(data)
-        #self.imageLabel.setPixmap(QPixmap.loadFromData(data, format="RGB"))
+    def publish(self, triplet):
+        data, width, height = triplet
+        image = QImage(width, height, QImage.Format_RGB32)
+        image.fromData(data)
+        image.save("hello.png", "PNG")
+
+        self.imageLabel.setPixmap(QPixmap.fromImage(image))
+
         #self.printAct.setEnabled(True)
         #self.fitToWindowAct.setEnabled(True)
         #self.updateActions()

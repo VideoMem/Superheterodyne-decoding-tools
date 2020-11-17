@@ -1,7 +1,7 @@
-import threading
-from asyncio import Queue
-import asyncio
+from queue import Queue
 from threading import Thread
+
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from parameters import Parameters
 from standards import LDCarriers
@@ -50,78 +50,80 @@ def self_test(p, rate, FFT_points):
 
 class Consumer:
     def __init__(self):
-        self.exit = False
         self.gui = spectra.GUIspectra()
         self.gui.show()
 
-    def end(self):
-        self.exit = True
-
-    async def worker(self, queue):
-        while not self.exit:
-            data = await queue.get()
-            self.gui.publish(data)
-            queue.task_done()
-
-        print('Consumer thread ended')
+    def worker(self, data):
+        self.gui.publish(data)
 
 
 class Main(Thread):
     def __init__(self):
         super().__init__()
-        self.queue = Queue()
-        self.consumer = Consumer()
-        self.loop = asyncio.get_event_loop()
-        self.task = self.setup_worker()
         self.exit = False
+        self.params = Parameters()
+        self.ld = LDCarriers(self.params.hsync())
+        audio = self.ld.audioNTSC()
+        efm = self.ld.efm()
+        self.carriers = { audio['L'], audio['R'], audio['AC3'], efm['L'], efm['H'] }
+        self.carrier_hist = { audio['L']: 0, audio['R']: 0, audio['AC3']: 0, efm['L']: 0, efm['H']: 0 }
+        self.FFT_points = 64
+        self.audio = audio
+        self.efm = efm
+        self.timer = QTimer()
+        self.timer.setInterval(50)
+        self.timer.timeout.connect(self.publish)
+        self.consumer = Consumer()
+        self.verbose_print()
+        #self.timer.start()
+
 
     def end(self):
+        self.timer.stop()
         self.exit = True
 
-    def setup_worker(self):
-        return self.loop.create_task(self.consumer.worker(self.queue))
+    def verbose_print(self):
+        print_parameters(self.params)
+        print_standards(self.params)
+        print('Starting FFT analysis ... ')
+
+    def publish(self):
+        self.consumer.worker(self.queue)
 
     def run(self):
-        params = Parameters()
-        print_parameters(params)
-        print_standards(params)
-        ld = LDCarriers(params.hsync())
-        audio = ld.audioNTSC()
-        efm = ld.efm()
-        carriers = { audio['L'], audio['R'], audio['AC3'], efm['L'], efm['H'] }
-        carrier_hist = { audio['L']: 0, audio['R']: 0, audio['AC3']: 0, efm['L']: 0, efm['H']: 0 }
-        print('Starting FFT analysis ... ')
-        FFT_points = 256
-        low_rate = nearest.power(params.samp_rate()/4, 2)
+        while not self.exit:
+            self.consumer.worker(self.produce())
+
+    def produce(self):
+        low_rate = nearest.power(self.params.samp_rate()/4, 2)
         #self_test(params, low_rate, FFT_points)
 
-        fft = FFT(FFT_points, low_rate)
+        fft = FFT(self.FFT_points, low_rate)
 
-        m = params.samp_rate() / low_rate
-        read_size = round(FFT_points * m)
-        print('read size', read_size)
-        skip = 32760
-        res = ar(params.samp_rate())
+        m = self.params.samp_rate() / low_rate
+        read_size = round(self.FFT_points * m)
+        #print('read size', read_size)
+        res = ar(self.params.samp_rate())
 
-        while skip > 0 and not self.exit:
-            x = read_block16(read_size)
-            xl = res.autorational_downsample(x, low_rate)
-            xn = fft.removeDC(xl)
-            yf = fft.do(xn)
-            self.queue.put_nowait(fft.plot(yf))
-            foo, bar, peaks = fft.peaks(yf)
-            #print(peaks)
-            carrier_hist = fft.carrier_hist(carriers, peaks, 1, carrier_hist)
-            skip -= 1
-        print(carrier_hist)
-        print('Reading thread ended')
+        x = read_block16(read_size)
+        xl = res.autorational_downsample(x, low_rate)
+        xn = fft.removeDC(xl)
+        yf = fft.do(xn)
+        return fft.plot(yf)
+        #foo, bar, peaks = fft.peaks(yf)
+        #print(peaks)
+        #carrier_hist = fft.carrier_hist(self.carriers, peaks, 1, carrier_hist)
+
+        #print(carrier_hist)
+        #print('Reading thread ended')
 
 
 if __name__ == '__main__':
     app = QApplication([])
-    t = Main()
-    t.daemon = True
-    t.start()
+    main = Main()
+    main.daemon = True
+    main.start()
+    #main.run()
     app.exec()
-    t.end()
-    t.join()
+    main.end()
+    main.join()
