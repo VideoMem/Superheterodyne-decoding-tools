@@ -70,11 +70,11 @@ class Main(Thread):
         self.FFT_points = 256
         self.audio = audio
         self.efm = efm
-        self.timer = QTimer()
-        self.timer.setInterval(50)
-        self.timer.timeout.connect(self.publish)
         self.consumer = Consumer()
         self.verbose_print()
+        #self.timer = QTimer()
+        #self.timer.setInterval(50)
+        #self.timer.timeout.connect(self.publish)
         #self.timer.start()
 
 
