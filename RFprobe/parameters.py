@@ -25,6 +25,8 @@ class Parameters:
                             help='vertical sync frequency (default %d)' % vsync_d())
         parser.add_argument('-s', '--samp_rate', nargs='?', default=input_samplerate_d(), type=int,
                             help='capture sample rate (default %d)' % input_samplerate_d())
+        parser.add_argument('-t', '--start_at', nargs='?', default=0, type=int,
+                            help='start analysis at (default %d seconds)' % 0)
         parser.add_argument('-o', '--output', nargs='?', default=output_filename_d(), type=str,
                             help='write analysis log to file (default, %s)' % output_filename_d())
 
@@ -56,5 +58,11 @@ class Parameters:
 
     def hsync(self):
         return self.vsync() * self.lines_per_frame()/2
+
+    def start_at(self):
+        if self.args.start_at is None:
+            return 0
+        else:
+            return self.args.start_at
 
 

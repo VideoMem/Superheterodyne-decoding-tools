@@ -16,7 +16,14 @@ class FFTtools:
         self.nyquist = int(samp_rate/2)
         self.savg = list()
         self.scount = 0
+        self.error = 2
 
+    def error(self, err):
+        self.error = err
+        return self.error
+
+    def get_error(self):
+        return self.error
 
     def removeDC(self, x):
         mean = sum(x) / len(x)
@@ -85,19 +92,19 @@ class FFTtools:
             peaks.append(xf[ind])
         return xf, yn, peaks
 
-    def plot(self, yf):
-        x, y, peaks = self.peaks(yf)
+    def plot(self, yp):
+        x, y, peaks = yp
 
         fig, ax = plt.subplots()
         plt.xlim((0, self.nyquist))
-        plt.ylim((-0.3, 0))
+        #plt.ylim((-0.3, 0))
         ax.plot(x, y)
 
 
         for carrier in self.carriers:
             ax.axvline(carrier, color='blue')
             for peak in peaks:
-                if self.in_range(peak, carrier, 10):
+                if self.in_range(peak, carrier, self.error):
                    ax.axvline(peak, color='red')
 
         canvas = FigureCanvasAgg(fig)

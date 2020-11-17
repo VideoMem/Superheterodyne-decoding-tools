@@ -72,14 +72,11 @@ class Main(Thread):
         self.efm = efm
         self.consumer = Consumer()
         self.verbose_print()
-        #self.timer = QTimer()
-        #self.timer.setInterval(50)
-        #self.timer.timeout.connect(self.publish)
-        #self.timer.start()
-
+        self.reads = 0
+        if self.params.start_at() > 0:
+            self.skip_head()
 
     def end(self):
-        self.timer.stop()
         self.exit = True
 
     def verbose_print(self):
@@ -91,28 +88,43 @@ class Main(Thread):
         while not self.exit:
             self.consumer.worker(self.produce())
 
+    def low_rate(self):
+        return nearest.power(self.params.samp_rate()/4, 2)
+
+    def skip_head(self):
+        skip_samples = self.params.samp_rate() * self.params.start_at()
+        m = self.params.samp_rate() / self.low_rate()
+        read_size = round(self.FFT_points * m)
+        print('skipping %f seconds' % self.params.start_at())
+        while skip_samples > 0:
+            read_block16(read_size)
+            skip_samples -= read_size
+
     def produce(self):
-        low_rate = nearest.power(self.params.samp_rate()/4, 2)
         #self_test(params, low_rate, FFT_points)
 
-        fft = FFT(self.FFT_points, low_rate, self.carriers)
+        fft = FFT(self.FFT_points, self.low_rate(), self.carriers)
 
-        m = self.params.samp_rate() / low_rate
+        m = self.params.samp_rate() / self.low_rate()
         read_size = round(self.FFT_points * m)
         #print('read size', read_size)
         res = ar(self.params.samp_rate())
 
         x = read_block16(read_size)
-        xl = res.autorational_downsample(x, low_rate)
+        xl = res.autorational_downsample(x, self.low_rate())
         xn = fft.removeDC(xl)
         yf = fft.do(xn)
-        return fft.plot(yf)
-        #foo, bar, peaks = fft.peaks(yf)
-        #print(peaks)
-        #carrier_hist = fft.carrier_hist(self.carriers, peaks, 1, carrier_hist)
+        yp = fft.peaks(yf)
+        self.reads += read_size
+        block = round(self.reads / read_size)
+        xd, yd, peaks = yp
+        self.carrier_hist = fft.carrier_hist(self.carriers, peaks, fft.get_error(), self.carrier_hist)
+        if block % 10 == 0:
+            print('Secs elapsed: %f' % (self.reads/self.params.samp_rate()))
+        if block % 100 == 0:
+            print('block: %d' % block, self.carrier_hist)
 
-        #print(carrier_hist)
-        #print('Reading thread ended')
+        return fft.plot(yp)
 
 
 if __name__ == '__main__':
