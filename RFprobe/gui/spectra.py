@@ -4,7 +4,6 @@ from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMainWindow, QMenu, QAction
 import numpy as np
 
-
 class GUIspectra(QMainWindow):
 
     def __init__(self):
@@ -56,6 +55,4 @@ class GUIspectra(QMainWindow):
         image.fromData(data)
 
         self.imageLabel.setPixmap(QPixmap.fromImage(image))
-
-
 

@@ -93,11 +93,12 @@ class FFTtools:
         plt.ylim((-0.3, 0))
         ax.plot(x, y)
 
+
         for carrier in self.carriers:
             ax.axvline(carrier, color='blue')
-
-        for peak in peaks:
-            ax.axvline(peak, color='red')
+            for peak in peaks:
+                if self.in_range(peak, carrier, 10):
+                   ax.axvline(peak, color='red')
 
         canvas = FigureCanvasAgg(fig)
         canvas.draw()
