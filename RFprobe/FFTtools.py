@@ -8,7 +8,8 @@ import nearest
 
 class FFTtools:
 
-    def __init__(self, FFTsize, samp_rate):
+    def __init__(self, FFTsize, samp_rate, carriers):
+        self.carriers = carriers
         self.FFTpoints = nearest.power(FFTsize, 2)
         self.T = 1/samp_rate
         self.samp_rate = samp_rate
@@ -86,8 +87,18 @@ class FFTtools:
 
     def plot(self, yf):
         x, y, peaks = self.peaks(yf)
+
         fig, ax = plt.subplots()
+        plt.xlim((0, self.nyquist))
+        plt.ylim((-0.3, 0))
         ax.plot(x, y)
+
+        for carrier in self.carriers:
+            ax.axvline(carrier, color='blue')
+
+        for peak in peaks:
+            ax.axvline(peak, color='red')
+
         canvas = FigureCanvasAgg(fig)
         canvas.draw()
         s, (width, height) = canvas.print_to_buffer()

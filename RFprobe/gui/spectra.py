@@ -4,6 +4,7 @@ from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMainWindow, QMenu, QAction
 import numpy as np
 
+
 class GUIspectra(QMainWindow):
 
     def __init__(self):
@@ -26,7 +27,7 @@ class GUIspectra(QMainWindow):
         self.createMenus()
 
         self.setWindowTitle("Spectra Viewer")
-        self.resize(500, 400)
+        self.resize(800, 600)
 
 
     def createActions(self):

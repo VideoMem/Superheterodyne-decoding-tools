@@ -87,9 +87,6 @@ class Main(Thread):
         print_standards(self.params)
         print('Starting FFT analysis ... ')
 
-    def publish(self):
-        self.consumer.worker(self.queue)
-
     def run(self):
         while not self.exit:
             self.consumer.worker(self.produce())
@@ -98,7 +95,7 @@ class Main(Thread):
         low_rate = nearest.power(self.params.samp_rate()/4, 2)
         #self_test(params, low_rate, FFT_points)
 
-        fft = FFT(self.FFT_points, low_rate)
+        fft = FFT(self.FFT_points, low_rate, self.carriers)
 
         m = self.params.samp_rate() / low_rate
         read_size = round(self.FFT_points * m)
