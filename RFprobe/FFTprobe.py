@@ -67,7 +67,7 @@ class Main(Thread):
         efm = self.ld.efm()
         self.carriers = { audio['L'], audio['R'], audio['AC3'], efm['L'], efm['H'] }
         self.carrier_hist = { audio['L']: 0, audio['R']: 0, audio['AC3']: 0, efm['L']: 0, efm['H']: 0 }
-        self.FFT_points = 64
+        self.FFT_points = 256
         self.audio = audio
         self.efm = efm
         self.timer = QTimer()
@@ -123,7 +123,6 @@ if __name__ == '__main__':
     main = Main()
     main.daemon = True
     main.start()
-    #main.run()
     app.exec()
     main.end()
     main.join()

@@ -94,7 +94,4 @@ class FFTtools:
         X = np.fromstring(s, np.uint8).reshape((height, width, 4))
         plt.close('all')
         return X.tobytes(), width, height
-        #q.put(X)
-        #plt.savefig
-        #plt.show()
-        #print(peaks)
+
