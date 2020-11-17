@@ -83,7 +83,6 @@ class GUIspectra(QMainWindow):
         data, width, height = triplet
         image = QImage(width, height, QImage.Format_RGB32)
         image.fromData(data)
-        image.save("hello.png", "PNG")
 
         self.imageLabel.setPixmap(QPixmap.fromImage(image))
 
