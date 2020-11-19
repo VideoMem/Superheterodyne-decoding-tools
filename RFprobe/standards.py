@@ -11,6 +11,12 @@ class LDCarriers:
             'AC3': 182.86 * self.fh
         }
 
+    def audioPAL(self):
+        return {
+            'L': 683e3,
+            'R': 1066e3,
+        }
+
     def efm(self):
         return {
             'L': 196e3,

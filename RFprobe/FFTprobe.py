@@ -5,11 +5,12 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from parameters import Parameters
 from standards import LDCarriers
-from sys import stdin
+
 import nearest
 from FFTtools import FFTtools as FFT
 from resample import Arbitrary as ar
 from gui import spectra
+from tests import stdin
 
 def toMHz(v):
     return v/1e6
@@ -31,13 +32,13 @@ def print_standards(p):
     print('expected AC3 QPSK carrier frequency: %.7f MHz' % toMHz(audio['AC3']))
 
 
-def read_block16(samples):
-    xf = list()
-    mid = 0xFFFF / 2
-    while len(xf) < samples:
-        x = int.from_bytes(stdin.buffer.read(2), byteorder='little', signed=False)
-        xf.append((x - mid/2) / mid)
-    return xf
+#def read_block16(samples):
+#    xf = list()
+#    mid = 0xFFFF / 2
+#    while len(xf) < samples:
+#        x = int.from_bytes(stdin.buffer.read(2), byteorder='little', signed=False)
+#        xf.append((x - mid/2) / mid)
+#    return xf
 
 
 def self_test(p, rate, FFT_points):
@@ -64,9 +65,10 @@ class Main(Thread):
         self.params = Parameters()
         self.ld = LDCarriers(self.params.hsync())
         audio = self.ld.audioNTSC()
+        audioPAL = self.ld.audioPAL()
         efm = self.ld.efm()
-        self.carriers = { audio['L'], audio['R'], audio['AC3'], efm['L'], efm['H'] }
-        self.carrier_hist = { audio['L']: 0, audio['R']: 0, audio['AC3']: 0, efm['L']: 0, efm['H']: 0 }
+        self.carriers = { efm['L'], efm['H'], audioPAL['L'], audioPAL['R'], audio['L'], audio['R'], audio['AC3'] }
+        self.carrier_hist = { efm['L']: 0, efm['H']: 0, audioPAL['L']: 0, audioPAL['R']: 0, audio['L']: 0, audio['R']: 0, audio['AC3']: 0 }
         self.FFT_points = 256
         self.audio = audio
         self.efm = efm
@@ -97,7 +99,7 @@ class Main(Thread):
         read_size = round(self.FFT_points * m)
         print('skipping %f seconds' % self.params.start_at())
         while skip_samples > 0:
-            read_block16(read_size)
+            stdin.read_block16(read_size)
             skip_samples -= read_size
 
     def produce(self):
@@ -110,7 +112,7 @@ class Main(Thread):
         #print('read size', read_size)
         res = ar(self.params.samp_rate())
 
-        x = read_block16(read_size)
+        x = stdin.read_block16(read_size)
         xl = res.autorational_downsample(x, self.low_rate())
         xn = fft.removeDC(xl)
         yf = fft.do(xn)
