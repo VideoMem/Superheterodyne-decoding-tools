@@ -13,7 +13,7 @@ def asMb(bytes):
 
 if __name__ == "__main__":
     size = 256
-    iters = int(10 * 1024*1024 / size)  # it reads 10Mb
+    iters = int(10 * 1024*1024 / size)  # it reads 10Mb in (size) chunks
 
     test(stdin.read_block16, size, iters, asMb(size), 'MBytes/s')
     test(stdin.osread, size, iters, asMb(size), 'MBytes/s')
