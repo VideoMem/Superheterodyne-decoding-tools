@@ -4,7 +4,7 @@ from readfile import ReadFile
 
 def test(funct, args, iters, units, name):
     print('Testing %s' % funct)
-    b = Benchmark(stdin.read_block16, iters)
+    b = Benchmark(funct, iters)
     b.run(args)
     b.units(units, name)
 

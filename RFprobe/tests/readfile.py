@@ -22,5 +22,5 @@ class ReadFile:
     def read(self, xtra):
         with open(self.filename, "rb") as binfile:
             data = np.fromstring(binfile.read(self.max_samples), dtype=self.ttype)
-            print('Loaded %d bytes of file %s' % (self.max_samples, self.filename))
+            #print('Loaded %d bytes of file %s' % (self.max_samples, self.filename))
         return data

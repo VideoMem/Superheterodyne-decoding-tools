@@ -29,7 +29,7 @@ def osread_block16(samples):
 def struct_short(samples):
     buffer = osread(samples)
     mid = 0xFFFF / 2
-    format = '<{}H'.format(len(buffer) / 2)
+    format = 'H' * int(len(buffer) / 2)
     short_array = struct.unpack(format, buffer)
     result = [(sample - mid / 2) / mid for sample in short_array]
     assert len(result) == samples
