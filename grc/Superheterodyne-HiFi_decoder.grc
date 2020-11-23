@@ -593,9 +593,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1792, 948.0]
+    coordinate: [1792, 1012.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: analog_fm_deemph_2_0
   id: analog_fm_deemph
   parameters:
@@ -610,9 +610,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1776, 1156.0]
+    coordinate: [1792, 1228.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: analog_quadrature_demod_cf_0
   id: analog_quadrature_demod_cf
   parameters:
@@ -1260,7 +1260,7 @@ blocks:
     comment: 10+ bit capture
     maxoutbuf: '0'
     minoutbuf: '0'
-    scale: 1/0xFFFF
+    scale: 2/0xFFFF
     vlen: '1'
   states:
     bus_sink: false
@@ -1557,7 +1557,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    command: ld-ldf-reader /home/sebastian/Downloads/VTR/LD/AC3.ldf
+    command: ld-ldf-reader ~/vault/VoyagerGallery_CAV_NTSC_side1_2020-01-18_07-26-55.ldf
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -2281,7 +2281,9 @@ connections:
 - [analog_agc2_xx_0_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_agc2_xx_0_0_0, '0', analog_quadrature_demod_cf_0_0, '0']
 - [analog_fm_deemph_0, '0', analog_fm_deemph_2, '0']
+- [analog_fm_deemph_0, '0', rational_resampler_xxx_1, '0']
 - [analog_fm_deemph_0_0, '0', analog_fm_deemph_2_0, '0']
+- [analog_fm_deemph_0_0, '0', rational_resampler_xxx_1_0, '0']
 - [analog_fm_deemph_2, '0', rational_resampler_xxx_1, '0']
 - [analog_fm_deemph_2_0, '0', rational_resampler_xxx_1_0, '0']
 - [analog_quadrature_demod_cf_0, '0', analog_fm_deemph_0, '0']

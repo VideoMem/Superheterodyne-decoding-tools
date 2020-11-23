@@ -1,16 +1,16 @@
-from time import time, gmtime, strftime
+from tests import Tests
+from time import time
 
-class Benchmark:
+class Benchmark(Tests):
 
     def __init__(self, funct, steps):
-        self.testant = funct
+        super(Benchmark, self).__init__(funct)
         self.loops = steps
-        self.results = 0
 
     def run(self, args):
         t0 = time()
         for i in range(0, int(self.loops)):
-            self.testant(args)
+            self.test(args)
         t1 = time()
         elapsed = t1 - t0
         self.results = self.loops / elapsed

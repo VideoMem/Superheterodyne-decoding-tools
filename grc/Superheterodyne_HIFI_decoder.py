@@ -322,7 +322,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader /home/sebastian/Downloads/VTR/LD/AC3.ldf')
+        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/vault/VoyagerGallery_CAV_NTSC_side1_2020-01-18_07-26-55.ldf')
         self.low_pass_filter_0_1 = filter.fir_filter_fff(
             1,
             firdes.low_pass(
@@ -417,7 +417,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink('demodulated_hifi.wav', 2, round(audio_rate), 16)
         self.blocks_threshold_ff_0_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
         self.blocks_threshold_ff_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
-        self.blocks_short_to_float_0_0 = blocks.short_to_float(1, 1/0xFFFF)
+        self.blocks_short_to_float_0_0 = blocks.short_to_float(1, 2/0xFFFF)
         self.blocks_rms_xx_0_2 = blocks.rms_ff(1/RMS_average)
         self.blocks_rms_xx_0_0_0 = blocks.rms_ff(1/RMS_average)
         self.blocks_rms_xx_0_0 = blocks.rms_ff(1/1024)
@@ -474,8 +474,6 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.analog_rail_ff_1_1 = analog.rail_ff(-0.999, 0.999)
         self.analog_quadrature_demod_cf_0_0 = analog.quadrature_demod_cf(if_rate/(2*math.pi*VCO_deviation/8.0))
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(if_rate/(2*math.pi*VCO_deviation/8.0))
-        self.analog_fm_deemph_2_0 = analog.fm_deemph(fs=if_rate, tau=25e-6)
-        self.analog_fm_deemph_2 = analog.fm_deemph(fs=if_rate, tau=25e-6)
         self.analog_fm_deemph_0_0 = analog.fm_deemph(fs=if_rate, tau=75e-6)
         self.analog_fm_deemph_0 = analog.fm_deemph(fs=if_rate, tau=75e-6)
         self.analog_agc2_xx_0_0_0 = analog.agc2_cc(1/Fh, 1/Fh, 1, 1)
@@ -494,10 +492,8 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.analog_agc2_xx_0, 0), (self.band_pass_filter_0_0, 0))
         self.connect((self.analog_agc2_xx_0_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.analog_agc2_xx_0_0_0, 0), (self.analog_quadrature_demod_cf_0_0, 0))
-        self.connect((self.analog_fm_deemph_0, 0), (self.analog_fm_deemph_2, 0))
-        self.connect((self.analog_fm_deemph_0_0, 0), (self.analog_fm_deemph_2_0, 0))
-        self.connect((self.analog_fm_deemph_2, 0), (self.rational_resampler_xxx_1, 0))
-        self.connect((self.analog_fm_deemph_2_0, 0), (self.rational_resampler_xxx_1_0, 0))
+        self.connect((self.analog_fm_deemph_0, 0), (self.rational_resampler_xxx_1, 0))
+        self.connect((self.analog_fm_deemph_0_0, 0), (self.rational_resampler_xxx_1_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.analog_fm_deemph_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0_0, 0), (self.analog_fm_deemph_0_0, 0))
         self.connect((self.analog_rail_ff_1_1, 0), (self.blocks_float_to_complex_1, 0))
