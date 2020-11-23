@@ -8,8 +8,8 @@ class Idempotency:
         self.B = Tests(B)
 
     def run(self, args):
-        self.A.test(args)
-        self.B.test(args)
+        self.A.run(args)
+        self.B.run(args)
         if self.A.get_output() != self.B.get_output():
             print('%s output does not match %s output' % (self.A.test, self.B.test))
             return False

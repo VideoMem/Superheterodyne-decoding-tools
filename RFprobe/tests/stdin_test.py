@@ -6,7 +6,7 @@ from readfile import ReadFile
 def idem(f0, f1, args):
     print('Testing %s vs %s' % (f0, f1))
     t = Idempotency(f0, f1)
-    t.run(args)
+    return t.run(args)
 
 def bench(funct, args, iters, units, name):
     print('Testing %s' % funct)
@@ -27,8 +27,13 @@ def run_benchmarks(size, iters):
     readf = ReadFile('/dev/zero', size)
     bench(readf.read, size, iters, asMb(size), 'MBytes/s')
 
+
 def run_idempotency_tests(size):
-    idem(stdin.read_block16, stdin.read_block16, size)
+    to_compare = { stdin.read_block16, stdin.osread_block16, stdin.struct_short, stdin.array_short }
+    for test in to_compare:
+        if idem(stdin.read_block16, test, size):
+            print('checks Ok')
+
 
 if __name__ == "__main__":
     size = 256
