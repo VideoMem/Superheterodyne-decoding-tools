@@ -72,7 +72,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '8'
+    value: '10'
   states:
     bus_sink: false
     bus_source: false
@@ -515,7 +515,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1504, 528.0]
+    coordinate: [1704, 512.0]
     rotation: 0
     state: true
 - name: blocks_keep_one_in_n_0
@@ -1121,7 +1121,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'False'
+    autoscale: 'True'
     average: '1.0'
     axislabels: 'True'
     bw: if_rate
@@ -1139,7 +1139,7 @@ blocks:
     ctrlpanel: 'False'
     fc: '0'
     fftsize: FFT_points
-    freqhalf: 'True'
+    freqhalf: 'False'
     grid: 'False'
     gui_hint: ''
     label: Relative Gain
@@ -1153,7 +1153,7 @@ blocks:
     label7: ''''''
     label8: ''''''
     label9: ''''''
-    legend: 'True'
+    legend: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
     name: '""'
@@ -1163,7 +1163,7 @@ blocks:
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_FREE
     tr_tag: '""'
-    type: complex
+    type: float
     units: dB
     update_time: '0.10'
     width1: '1'
@@ -1183,7 +1183,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2048, 592.0]
+    coordinate: [1624, 616.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -1298,7 +1298,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'False'
+    autoscale: 'True'
     axislabels: 'True'
     color1: blue
     color10: dark blue
@@ -1325,7 +1325,7 @@ blocks:
     label7: Signal 7
     label8: Signal 8
     label9: Signal 9
-    legend: 'True'
+    legend: 'False'
     marker1: '-1'
     marker10: '-1'
     marker2: '-1'
@@ -1531,7 +1531,6 @@ connections:
 - [blocks_complex_to_real_0, '0', blocks_multiply_const_vxx_1, '0']
 - [blocks_delay_1, '0', blocks_sub_xx_0_0, '0']
 - [blocks_file_source_0, '0', blocks_short_to_float_0, '0']
-- [blocks_float_to_complex_0, '0', qtgui_freq_sink_x_1, '0']
 - [blocks_float_to_complex_0, '0', virtual_sink_0, '0']
 - [blocks_keep_one_in_n_0, '0', blocks_complex_to_arg_0, '0']
 - [blocks_keep_one_in_n_0_0, '0', blocks_complex_to_arg_0_0, '0']
@@ -1555,6 +1554,7 @@ connections:
 - [fft_vxx_0, '0', blocks_vector_to_stream_0, '0']
 - [fft_vxx_0_0, '0', blocks_vector_to_stream_0_0, '0']
 - [high_pass_filter_0, '0', blocks_float_to_complex_0, '0']
+- [high_pass_filter_0, '0', qtgui_freq_sink_x_1, '0']
 - [high_pass_filter_0, '0', virtual_sink_0_0, '0']
 - [low_pass_filter_0, '0', blocks_wavfile_sink_0, '0']
 - [low_pass_filter_0, '0', dc_blocker_xx_1, '0']

@@ -1,6 +1,7 @@
 from sys import argv, stdout
 from struct import pack
 from numpy import array
+from array import array
 
 def gen_uint16_t(length):
     block = list()
@@ -24,11 +25,10 @@ def short_char(shorts):
         chars.append(lsb)
 
     assert len(chars) == 2 * len(shorts)
-    return chars
+    return array('B', chars)
 
 if __name__ == "__main__":
     print('size:', argv[1])
     block = short_char(gen_uint16_t(int(argv[1])))
     while True:
-        stdout.write(block.decode('utf-8'))
-        #print('%s' % block)
+        stdout.buffer.write(block)
