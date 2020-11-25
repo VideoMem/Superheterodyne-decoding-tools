@@ -30,6 +30,7 @@ from fractions import Fraction
 from gnuradio import analog
 import math
 from gnuradio import blocks
+import pmt
 from gnuradio import filter
 from gnuradio import gr
 import sys
@@ -40,7 +41,6 @@ from gnuradio import eng_notation
 from gnuradio import zeromq
 from gnuradio.qtgui import Range, RangeWidget
 import nearest  # embedded python module
-import pipe
 import time
 import threading
 
@@ -110,6 +110,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.RMS_threshold = RMS_threshold = 0.1
         self.RMS_average = RMS_average = round(pop_len*10/2)
         self.L_carrier = L_carrier = L_carrier_ref + carrierL_fine + center_freq
+        self.FM_HPF = FM_HPF = 120
 
         ##################################################
         # Blocks
@@ -130,6 +131,11 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.tabs_grid_layout_2 = Qt.QGridLayout()
         self.tabs_layout_2.addLayout(self.tabs_grid_layout_2)
         self.tabs.addTab(self.tabs_widget_2, 'Output')
+        self.tabs_widget_3 = Qt.QWidget()
+        self.tabs_layout_3 = Qt.QBoxLayout(Qt.QBoxLayout.TopToBottom, self.tabs_widget_3)
+        self.tabs_grid_layout_3 = Qt.QGridLayout()
+        self.tabs_layout_3.addLayout(self.tabs_grid_layout_3)
+        self.tabs.addTab(self.tabs_widget_3, 'Input')
         self.top_grid_layout.addWidget(self.tabs)
         self._volume_range = Range(0, 2, 0.01, 0.7, 200)
         self._volume_win = RangeWidget(self._volume_range, self.set_volume, 'Volume', "counter_slider", float)
@@ -213,10 +219,10 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_2.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            1024, #size
-            samp_rate, #samp_rate
+            8192, #size
+            if_rate, #samp_rate
             "", #name
-            1 #number of inputs
+            2 #number of inputs
         )
         self.qtgui_time_sink_x_0.set_update_time(0.10)
         self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
@@ -224,13 +230,14 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
 
         self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_AUTO, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
         self.qtgui_time_sink_x_0.enable_autoscale(False)
         self.qtgui_time_sink_x_0.enable_grid(False)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
         self.qtgui_time_sink_x_0.enable_control_panel(False)
         self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
+        self.qtgui_time_sink_x_0.disable_legend()
 
         labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
             'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
@@ -246,7 +253,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
             -1, -1, -1, -1, -1]
 
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -258,7 +265,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
             self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.tabs_layout_3.addWidget(self._qtgui_time_sink_x_0_win)
         self.qtgui_number_sink_0_1_1 = qtgui.number_sink(
             gr.sizeof_float,
             0,
@@ -369,7 +376,6 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/vault/Kylie_CLV_NTSC_side1__2020-11-22_18-11-36.ldf')
         self.low_pass_filter_0_1 = filter.fir_filter_fff(
             1,
             firdes.low_pass(
@@ -472,12 +478,13 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink('demodulated_hifi.wav', 2, round(audio_rate), 16)
         self.blocks_threshold_ff_0_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
         self.blocks_threshold_ff_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
-        self.blocks_short_to_float_0_0 = blocks.short_to_float(1, 0x400)
+        self.blocks_sub_xx_0 = blocks.sub_ff(1)
+        self.blocks_short_to_float_0_0 = blocks.short_to_float(1, 1)
         self.blocks_rms_xx_0_2 = blocks.rms_ff(1/RMS_average)
         self.blocks_rms_xx_0_0_0 = blocks.rms_ff(1/RMS_average)
         self.blocks_rms_xx_0_0 = blocks.rms_ff(1/1024)
         self.blocks_rms_xx_0 = blocks.rms_ff(1/1024)
-        self.blocks_multiply_const_vxx_5 = blocks.multiply_const_cc(10000)
+        self.blocks_multiply_const_vxx_5 = blocks.multiply_const_cc(1)
         self.blocks_multiply_const_vxx_4 = blocks.multiply_const_ff(0.001)
         self.blocks_multiply_const_vxx_3_0 = blocks.multiply_const_ff(0.5)
         self.blocks_multiply_const_vxx_3 = blocks.multiply_const_ff(0.5)
@@ -485,8 +492,12 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_ff(20)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_ff(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(1)
+        self.blocks_moving_average_xx_0 = blocks.moving_average_ff(round(if_rate /  FM_HPF), 1/round(if_rate / FM_HPF), 4000, 1)
         self.blocks_float_to_complex_1 = blocks.float_to_complex(1)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_short*1, '/home/sebastian/Downloads/VTR/LD/AC3.ld', True, 0, 0)
+        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_delay_1 = blocks.delay(gr.sizeof_float*1, round(if_rate /  FM_HPF))
         self.blocks_delay_0_0 = blocks.delay(gr.sizeof_float*1, fh_comb_delay)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, fh_comb_delay)
         self.blocks_complex_to_real_0 = blocks.complex_to_real(1)
@@ -570,8 +581,12 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_complex_to_real_0, 0), (self.blocks_multiply_const_vxx_4, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_add_xx_2, 1))
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_add_xx_2_0, 1))
+        self.connect((self.blocks_delay_1, 0), (self.blocks_sub_xx_0, 0))
+        self.connect((self.blocks_file_source_0, 0), (self.blocks_short_to_float_0_0, 0))
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_const_vxx_5, 0))
         self.connect((self.blocks_float_to_complex_1, 0), (self.zeromq_rep_sink_0, 0))
+        self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_sub_xx_0, 1))
+        self.connect((self.blocks_moving_average_xx_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.analog_rail_ff_1_1_1, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_rms_xx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0_0, 0), (self.analog_rail_ff_1_1_1_0, 0))
@@ -588,6 +603,7 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_rms_xx_0_0_0, 0), (self.blocks_threshold_ff_0_0, 0))
         self.connect((self.blocks_rms_xx_0_2, 0), (self.blocks_threshold_ff_0, 0))
         self.connect((self.blocks_short_to_float_0_0, 0), (self.rational_resampler_xxx_0, 0))
+        self.connect((self.blocks_sub_xx_0, 0), (self.high_pass_filter_0, 0))
         self.connect((self.blocks_threshold_ff_0, 0), (self.LS_signal, 0))
         self.connect((self.blocks_threshold_ff_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_threshold_ff_0_0, 0), (self.RS_signal, 0))
@@ -604,8 +620,8 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.low_pass_filter_0_0_0, 0), (self.blocks_rms_xx_0_0_0, 0))
         self.connect((self.low_pass_filter_0_1, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.low_pass_filter_0_1, 0), (self.blocks_rms_xx_0_2, 0))
-        self.connect((self.pipe_source_1, 0), (self.blocks_short_to_float_0_0, 0))
-        self.connect((self.rational_resampler_xxx_0, 0), (self.high_pass_filter_0, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_delay_1, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_moving_average_xx_0, 0))
         self.connect((self.rational_resampler_xxx_1, 0), (self.low_pass_filter_0_0, 0))
         self.connect((self.rational_resampler_xxx_1_0, 0), (self.low_pass_filter_0, 0))
 
@@ -689,7 +705,6 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_if_rate(nearest.power(self.samp_rate/4,2))
-        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
 
     def get_pop_len(self):
         return self.pop_len
@@ -799,8 +814,11 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0_0.set_sampling_freq(self.if_rate)
         self.band_pass_filter_0.set_taps(firdes.band_pass(1, self.if_rate, self.L_carrier - self.VCO_deviation /2, self.L_carrier + self.VCO_deviation /2, self.sharpness, firdes.WIN_KAISER, 6.76))
         self.band_pass_filter_0_0.set_taps(firdes.band_pass(1, self.if_rate, self.R_carrier - self.VCO_deviation / 2 , self.R_carrier + self.VCO_deviation / 2, self.sharpness, firdes.WIN_KAISER, 6.76))
+        self.blocks_delay_1.set_dly(round(self.if_rate /  self.FM_HPF))
+        self.blocks_moving_average_xx_0.set_length_and_scale(round(self.if_rate /  self.FM_HPF), 1/round(self.if_rate / self.FM_HPF))
         self.high_pass_filter_0.set_taps(firdes.high_pass(1, self.if_rate, 1e6, 500e3, firdes.WIN_KAISER, 14))
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.if_rate)
+        self.qtgui_time_sink_x_0.set_samp_rate(self.if_rate)
 
     def get_half_VCO_deviation(self):
         return self.half_VCO_deviation
@@ -851,6 +869,14 @@ class Superheterodyne_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0.set_frequency(self.L_carrier)
         self.band_pass_filter_0.set_taps(firdes.band_pass(1, self.if_rate, self.L_carrier - self.VCO_deviation /2, self.L_carrier + self.VCO_deviation /2, self.sharpness, firdes.WIN_KAISER, 6.76))
         self.freq_xlating_fir_filter_xxx_0.set_center_freq(self.L_carrier)
+
+    def get_FM_HPF(self):
+        return self.FM_HPF
+
+    def set_FM_HPF(self, FM_HPF):
+        self.FM_HPF = FM_HPF
+        self.blocks_delay_1.set_dly(round(self.if_rate /  self.FM_HPF))
+        self.blocks_moving_average_xx_0.set_length_and_scale(round(self.if_rate /  self.FM_HPF), 1/round(self.if_rate / self.FM_HPF))
 
 
 

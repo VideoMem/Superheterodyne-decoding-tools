@@ -32,6 +32,18 @@ options:
     state: enabled
 
 blocks:
+- name: FM_HPF
+  id: variable
+  parameters:
+    comment: Hz
+    value: '120'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1104, 220.0]
+    rotation: 0
+    state: true
 - name: Fcc_Fcl
   id: variable
   parameters:
@@ -842,7 +854,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    delay: round(samp_rate /  120)
+    delay: round(samp_rate / FM_HPF)
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
@@ -1048,11 +1060,11 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    length: round(samp_rate /  120)
+    length: round(samp_rate /  FM_HPF)
     max_iter: '4000'
     maxoutbuf: '0'
     minoutbuf: '0'
-    scale: 1/round(samp_rate / 120)
+    scale: 1/round(samp_rate / FM_HPF)
     type: float
     vlen: '1'
   states:
