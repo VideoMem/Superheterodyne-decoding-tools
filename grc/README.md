@@ -24,4 +24,4 @@ Quick and dirty oscilloscope with a QT Time sink
 ## Superheterodyne HiFi decoder
 
 Same as VHS-HiFi but calibrated to decode LaserDisc NTSC analog audio
-
+See the main readme of the project for reference
