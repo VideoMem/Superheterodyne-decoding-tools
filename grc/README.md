@@ -17,11 +17,11 @@ The uncalibrated CX decoder flowchart
 It produces an audible tone to hear the carrier phase shift. 
 It is intended to use with the file produced with the test-signal-generator.grc
 
-##Oscope
+## Oscope
 
 Quick and dirty oscilloscope with a QT Time sink
 
-##Superheterodyne HiFi decoder
+## Superheterodyne HiFi decoder
 
 Same as VHS-HiFi but calibrated to decode LaserDisc NTSC analog audio
 
