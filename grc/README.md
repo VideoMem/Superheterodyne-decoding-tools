@@ -21,7 +21,7 @@ It is intended to use with the file produced with the test-signal-generator.grc
 
 Quick and dirty oscilloscope with a QT Time sink
 
-## Superheterodyne HiFi decoder
+## LD HiFi decoder
 
 Same as VHS-HiFi but calibrated to decode LaserDisc NTSC analog audio
 See the main readme of the project for reference

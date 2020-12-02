@@ -910,7 +910,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/sebastian/Downloads/VTR/vhs_pal_multiburst/test.r8
+    file: /home/sebastian/Downloads/VTR/captures/lg.r8
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1276,7 +1276,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    beta: '6.76'
+    beta: '14'
     comment: ''
     cutoff_freq: 10e6
     decim: '1'
@@ -1287,7 +1287,7 @@ blocks:
     samp_rate: samp_rate
     type: fir_filter_ccf
     width: 2e6
-    win: firdes.WIN_HAMMING
+    win: firdes.WIN_KAISER
   states:
     bus_sink: false
     bus_source: false
@@ -1300,7 +1300,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    beta: '6.76'
+    beta: '14'
     comment: ''
     cutoff_freq: chroma_adjusted
     decim: '1'
@@ -1311,7 +1311,7 @@ blocks:
     samp_rate: samp_rate
     type: fir_filter_ccf
     width: luma_fm_carrier_filter_peak-chroma_adjusted
-    win: firdes.WIN_HAMMING
+    win: firdes.WIN_KAISER
   states:
     bus_sink: false
     bus_source: false
@@ -1387,7 +1387,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    beta: '6.76'
+    beta: '14'
     comment: ''
     cutoff_freq: 200e3
     decim: '1'
@@ -1398,7 +1398,7 @@ blocks:
     samp_rate: samp_rate
     type: fir_filter_ccf
     width: chroma_adjusted - 375e3
-    win: firdes.WIN_HAMMING
+    win: firdes.WIN_KAISER
   states:
     bus_sink: false
     bus_source: false
@@ -1411,7 +1411,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    beta: '6.76'
+    beta: '14'
     comment: ''
     cutoff_freq: 8e6
     decim: '1'
@@ -1422,7 +1422,7 @@ blocks:
     samp_rate: samp_rate
     type: fir_filter_ccf
     width: 8e6-luma_fm_carrier_filter_peak
-    win: firdes.WIN_HAMMING
+    win: firdes.WIN_KAISER
   states:
     bus_sink: false
     bus_source: false

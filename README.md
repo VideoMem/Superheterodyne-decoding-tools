@@ -1,10 +1,15 @@
 # Superheterodyne decoding tools
 A set of tools to decode RF audio and video signals present on LaserDiscs and/or VTRs/VHSs
 
-This tools takes the raw ADC capture from the [Domesday Duplicator](https://www.domesday86.com/?page_id=978) and/or the [CXADC](https://github.com/happycube/cxadc-linux3),
+# LD-HiFi analogue audio decoder
+
+This tool takes the raw ADC capture from the [Domesday Duplicator](https://www.domesday86.com/?page_id=978) and/or the [CXADC](https://github.com/happycube/cxadc-linux3),
 demodulates the analog FM carriers, and then translates it into a 16bit 192kHz sample rate audio .wav file.
 
-Additionally it has a prototype of the CX noise reduction decoder.
+Additionally it has a prototype of the CX noise reduction decoder interpreted from a 1982 Popular Electronics article and translated into GNU Radio
+
+Both the demodulator, and the CX expander runs near realtime on my setup.
+(About 8 seconds per 5 seconds of 40MSPS capture file)
 
 ## Audio demodulator GUI
 
@@ -34,7 +39,7 @@ And enable the file source
 
 Or download the [gr-pipe](https://github.com/jolivain/gr-pipe) module for gnuradio to decode on the fly directly from the .oga / .ldf image
 
-2) Open/edit the [Audio demodulator](/grc/Superheterodyne-HiFi_decoder.grc) in gnuradio-companion
+2) Open/edit the [Audio demodulator](/grc/LD-HiFi_decoder.grc) in gnuradio-companion
 3) Open/edit the [CX decoder](/grc/CX_decoder.grc) 
 
 4) Configure the input sample rate (samp_rate) and or/ the carrier frequencies on the variables on top of the flowgraph.
@@ -70,6 +75,8 @@ The demodulator produces a "demodulated_hifi.wav"
 
 The CX decoder produces a "CX_decoded_output.wav"
 
-Thanks for testing it!
+## VCR/VHS and related
+
+See /grc folder, still experimental 
 
 

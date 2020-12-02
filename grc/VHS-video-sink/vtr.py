@@ -113,6 +113,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.audio_rate = audio_rate = round(48e3*4)
         self.Fv = Fv = 60
         self.Fcc_Fcl = Fcc_Fcl = 455/80
+        self.FM_HPF = FM_HPF = 120
 
         ##################################################
         # Blocks
@@ -508,8 +509,8 @@ class vtr(gr.top_block, Qt.QWidget):
                 samp_rate,
                 8e6,
                 8e6-luma_fm_carrier_filter_peak,
-                firdes.WIN_HAMMING,
-                6.76))
+                firdes.WIN_KAISER,
+                14))
         self.low_pass_filter_0 = filter.fir_filter_ccf(
             1,
             firdes.low_pass(
@@ -517,8 +518,8 @@ class vtr(gr.top_block, Qt.QWidget):
                 samp_rate,
                 200e3,
                 chroma_adjusted - 375e3,
-                firdes.WIN_HAMMING,
-                6.76))
+                firdes.WIN_KAISER,
+                14))
         self.high_pass_filter_2 = filter.fir_filter_fff(
             1,
             firdes.high_pass(
@@ -535,8 +536,8 @@ class vtr(gr.top_block, Qt.QWidget):
                 samp_rate,
                 chroma_adjusted,
                 luma_fm_carrier_filter_peak-chroma_adjusted,
-                firdes.WIN_HAMMING,
-                6.76))
+                firdes.WIN_KAISER,
+                14))
         self.high_pass_filter_0 = filter.fir_filter_ccf(
             1,
             firdes.high_pass(
@@ -544,8 +545,8 @@ class vtr(gr.top_block, Qt.QWidget):
                 samp_rate,
                 10e6,
                 2e6,
-                firdes.WIN_HAMMING,
-                6.76))
+                firdes.WIN_KAISER,
+                14))
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, [1], luma_fm_carrier, samp_rate)
         self._chroma_fine_range = Range(-1, 1, 0.0001, 0, 200)
         self._chroma_fine_win = RangeWidget(self._chroma_fine_range, self.set_chroma_fine, 'Fine', "counter_slider", float)
@@ -571,7 +572,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.blocks_multiply_const_vxx_10 = blocks.multiply_const_ff(1/64)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_ff(1/1.4)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(10)
-        self.blocks_moving_average_xx_0_2 = blocks.moving_average_ff(round(samp_rate /  120), 1/round(samp_rate / 120), 4000, 1)
+        self.blocks_moving_average_xx_0_2 = blocks.moving_average_ff(round(samp_rate /  FM_HPF), 1/round(samp_rate / FM_HPF), 4000, 1)
         self.blocks_moving_average_xx_0_1 = blocks.moving_average_ff(line_average*100, 1/(line_average*100), 4000, 1)
         self.blocks_moving_average_xx_0_0 = blocks.moving_average_ff(line_average*100, 1/(line_average*100), 100, 1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(line_average*100, 1/(line_average*100), 4000, 1)
@@ -579,10 +580,10 @@ class vtr(gr.top_block, Qt.QWidget):
         self.blocks_max_xx_0 = blocks.max_ff(one_line_samples*line_average, 1)
         self.blocks_float_to_uchar_0_0 = blocks.float_to_uchar()
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/sebastian/Downloads/VTR/vhs_pal_multiburst/test.r8', False, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/sebastian/Downloads/VTR/captures/lg.r8', False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_divide_xx_0 = blocks.divide_ff(1)
-        self.blocks_delay_1 = blocks.delay(gr.sizeof_float*1, round(samp_rate /  120))
+        self.blocks_delay_1 = blocks.delay(gr.sizeof_float*1, round(samp_rate / FM_HPF))
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, round(comb_delay))
         self.blocks_add_xx_2_0 = blocks.add_vff(1)
         self.blocks_add_xx_2 = blocks.add_vff(1)
@@ -744,13 +745,13 @@ class vtr(gr.top_block, Qt.QWidget):
         self.set_one_line_samples(nearest.power(self.samp_rate/self.Fh,2))
         self.analog_quadrature_demod_cf_0.set_gain(self.samp_rate/(2*math.pi*self.vco_deviation/8.0))
         self.band_reject_filter_0.set_taps(firdes.band_reject(1, self.samp_rate, self.luma_fm_carrier - 100e3, self.luma_fm_carrier + 100e3, 100e3, firdes.WIN_HAMMING, 6.76))
-        self.blocks_delay_1.set_dly(round(self.samp_rate /  120))
-        self.blocks_moving_average_xx_0_2.set_length_and_scale(round(self.samp_rate /  120), 1/round(self.samp_rate / 120))
-        self.high_pass_filter_0.set_taps(firdes.high_pass(0.1, self.samp_rate, 10e6, 2e6, firdes.WIN_HAMMING, 6.76))
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_HAMMING, 6.76))
+        self.blocks_delay_1.set_dly(round(self.samp_rate / self.FM_HPF))
+        self.blocks_moving_average_xx_0_2.set_length_and_scale(round(self.samp_rate /  self.FM_HPF), 1/round(self.samp_rate / self.FM_HPF))
+        self.high_pass_filter_0.set_taps(firdes.high_pass(0.1, self.samp_rate, 10e6, 2e6, firdes.WIN_KAISER, 14))
+        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
         self.high_pass_filter_2.set_taps(firdes.high_pass(self.comb_gain, self.samp_rate, self.luma_fm_carrier, 1e6, firdes.WIN_HAMMING, 6.76))
-        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_HAMMING, 6.76))
-        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_HAMMING, 6.76))
+        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_KAISER, 14))
+        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_KAISER, 14))
         self.low_pass_filter_2.set_taps(firdes.low_pass(1, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.low_pass_filter_2_0.set_taps(firdes.low_pass(self.sharpener, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.qtgui_freq_sink_x_0_0_0.set_frequency_range(0, self.samp_rate)
@@ -838,8 +839,8 @@ class vtr(gr.top_block, Qt.QWidget):
 
     def set_luma_fm_carrier_filter_peak(self, luma_fm_carrier_filter_peak):
         self.luma_fm_carrier_filter_peak = luma_fm_carrier_filter_peak
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_HAMMING, 6.76))
-        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_HAMMING, 6.76))
+        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
+        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_KAISER, 14))
 
     def get_lines_per_field(self):
         return self.lines_per_field
@@ -900,8 +901,8 @@ class vtr(gr.top_block, Qt.QWidget):
 
     def set_chroma_adjusted(self, chroma_adjusted):
         self.chroma_adjusted = chroma_adjusted
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_HAMMING, 6.76))
-        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_HAMMING, 6.76))
+        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
+        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_KAISER, 14))
 
     def get_brightness(self):
         return self.brightness
@@ -935,6 +936,14 @@ class vtr(gr.top_block, Qt.QWidget):
 
     def set_Fcc_Fcl(self, Fcc_Fcl):
         self.Fcc_Fcl = Fcc_Fcl
+
+    def get_FM_HPF(self):
+        return self.FM_HPF
+
+    def set_FM_HPF(self, FM_HPF):
+        self.FM_HPF = FM_HPF
+        self.blocks_delay_1.set_dly(round(self.samp_rate / self.FM_HPF))
+        self.blocks_moving_average_xx_0_2.set_length_and_scale(round(self.samp_rate /  self.FM_HPF), 1/round(self.samp_rate / self.FM_HPF))
 
 
 

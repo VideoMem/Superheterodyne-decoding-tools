@@ -83,12 +83,12 @@ class CX_NR(gr.top_block, Qt.QWidget):
         ##################################################
         self.samp_rate = samp_rate = 192e3
         self.decimation = decimation = 4
-        self.volume = volume = 0.5
+        self.volume = volume = 1
         self.tp1_gain = tp1_gain = 0.52
         self.test_tone_enable = test_tone_enable = 0.0
         self.test_gain = test_gain = 1
         self.min_average = min_average = 128
-        self.knee_point = knee_point = 0.2900
+        self.knee_point = knee_point = 0.0600
         self.dry = dry = 1
         self.diode_drop = diode_drop = 0.5
         self.ctrl_rate = ctrl_rate = round(samp_rate/decimation)
@@ -112,7 +112,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.tabs.addTab(self.tabs_widget_1, 'Advanced')
         self.top_grid_layout.addWidget(self.tabs)
         self.envelope_probe = blocks.probe_signal_f()
-        self._volume_range = Range(0, 2, 0.01, 0.5, 200)
+        self._volume_range = Range(0, 2, 0.01, 1, 200)
         self._volume_win = RangeWidget(self._volume_range, self.set_volume, 'Volume', "counter_slider", float)
         self.top_grid_layout.addWidget(self._volume_win)
         self._tp1_gain_range = Range(0, 2, 0.01, 0.52, 200)
@@ -128,7 +128,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self._test_gain_range = Range(0, 2, 0.01, 1, 200)
         self._test_gain_win = RangeWidget(self._test_gain_range, self.set_test_gain, 'Preamp Gain', "counter_slider", float)
         self.tabs_layout_0.addWidget(self._test_gain_win)
-        self._knee_point_range = Range(0, 2, 0.01, 0.2900, 200)
+        self._knee_point_range = Range(0, 2, 0.01, 0.0600, 200)
         self._knee_point_win = RangeWidget(self._knee_point_range, self.set_knee_point, 'Knee point', "counter_slider", float)
         self.tabs_layout_0.addWidget(self._knee_point_win)
         self._dry_range = Range(0, 1, 0.01, 1, 200)
@@ -165,7 +165,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
                 taps=None,
                 fractional_bw=None)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            86*1024, #size
+            ctrl_rate*5, #size
             ctrl_rate, #samp_rate
             "Envelope", #name
             2 #number of inputs
@@ -276,6 +276,24 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.qtgui_number_sink_0.enable_autoscale(False)
         self._qtgui_number_sink_0_win = sip.wrapinstance(self.qtgui_number_sink_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_number_sink_0_win)
+        self.low_pass_filter_2_0 = filter.fir_filter_fff(
+            1,
+            firdes.low_pass(
+                1,
+                samp_rate,
+                1e3,
+                3e3,
+                firdes.WIN_HAMMING,
+                6.76))
+        self.low_pass_filter_2 = filter.fir_filter_fff(
+            1,
+            firdes.low_pass(
+                1,
+                samp_rate,
+                1e3,
+                3e3,
+                firdes.WIN_HAMMING,
+                6.76))
         self.low_pass_filter_1 = filter.fir_filter_fff(
             1,
             firdes.low_pass(
@@ -352,8 +370,10 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.blocks_multiply_const_vxx_9 = blocks.multiply_const_ff(0.5)
         self.blocks_multiply_const_vxx_8_0 = blocks.multiply_const_ff(volume)
         self.blocks_multiply_const_vxx_8 = blocks.multiply_const_ff(volume)
-        self.blocks_multiply_const_vxx_7 = blocks.multiply_const_ff(ctrl_envelope+dry)
-        self.blocks_multiply_const_vxx_6 = blocks.multiply_const_ff(ctrl_envelope+dry)
+        self.blocks_multiply_const_vxx_7_0 = blocks.multiply_const_ff(ctrl_envelope)
+        self.blocks_multiply_const_vxx_7 = blocks.multiply_const_ff(dry)
+        self.blocks_multiply_const_vxx_6_0 = blocks.multiply_const_ff(ctrl_envelope)
+        self.blocks_multiply_const_vxx_6 = blocks.multiply_const_ff(dry)
         self.blocks_multiply_const_vxx_5 = blocks.multiply_const_ff(0.04)
         self.blocks_multiply_const_vxx_4 = blocks.multiply_const_ff(tp1_gain)
         self.blocks_multiply_const_vxx_3_0 = blocks.multiply_const_ff(test_gain)
@@ -375,6 +395,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.blocks_delay_0_0 = blocks.delay(gr.sizeof_float*1, ctrl_delay)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, ctrl_delay)
         self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
+        self.blocks_add_xx_8 = blocks.add_vff(1)
+        self.blocks_add_xx_7 = blocks.add_vff(1)
         self.blocks_add_xx_6 = blocks.add_vff(1)
         self.blocks_add_xx_5_0 = blocks.add_vff(1)
         self.blocks_add_xx_5 = blocks.add_vff(1)
@@ -467,12 +489,16 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_add_xx_5_0, 0), (self.low_pass_filter_1, 0))
         self.connect((self.blocks_add_xx_6, 0), (self.blocks_delay_0_0_0, 0))
         self.connect((self.blocks_add_xx_6, 0), (self.blocks_multiply_const_vxx_3_0, 0))
+        self.connect((self.blocks_add_xx_7, 0), (self.blocks_multiply_const_vxx_8_0, 0))
+        self.connect((self.blocks_add_xx_8, 0), (self.blocks_multiply_const_vxx_8, 0))
         self.connect((self.blocks_complex_to_float_0, 0), (self.blocks_multiply_xx_5_0, 0))
         self.connect((self.blocks_complex_to_float_0, 1), (self.blocks_multiply_xx_5_0_0, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_null_sink_1_0, 1))
         self.connect((self.blocks_delay_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_7, 0))
+        self.connect((self.blocks_delay_0_0, 0), (self.low_pass_filter_2, 0))
         self.connect((self.blocks_delay_0_0_0, 0), (self.blocks_multiply_const_vxx_6, 0))
+        self.connect((self.blocks_delay_0_0_0, 0), (self.low_pass_filter_2_0, 0))
         self.connect((self.blocks_float_to_uchar_0_0, 0), (self.blocks_sample_and_hold_xx_0_0, 1))
         self.connect((self.blocks_float_to_uchar_0_0_0, 0), (self.blocks_sample_and_hold_xx_0_0_0, 1))
         self.connect((self.blocks_float_to_uchar_0_0_0_0, 0), (self.blocks_sample_and_hold_xx_0_0_0_0, 1))
@@ -494,8 +520,10 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_3_0, 0), (self.high_pass_filter_0_1, 0))
         self.connect((self.blocks_multiply_const_vxx_4, 0), (self.analog_rail_ff_0_0_0, 0))
         self.connect((self.blocks_multiply_const_vxx_5, 0), (self.blocks_add_xx_5_0, 0))
-        self.connect((self.blocks_multiply_const_vxx_6, 0), (self.blocks_multiply_const_vxx_8, 0))
-        self.connect((self.blocks_multiply_const_vxx_7, 0), (self.blocks_multiply_const_vxx_8_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_6, 0), (self.blocks_add_xx_8, 0))
+        self.connect((self.blocks_multiply_const_vxx_6_0, 0), (self.blocks_add_xx_8, 1))
+        self.connect((self.blocks_multiply_const_vxx_7, 0), (self.blocks_add_xx_7, 0))
+        self.connect((self.blocks_multiply_const_vxx_7_0, 0), (self.blocks_add_xx_7, 1))
         self.connect((self.blocks_multiply_const_vxx_8, 0), (self.blocks_multiply_const_vxx_9_0, 0))
         self.connect((self.blocks_multiply_const_vxx_8_0, 0), (self.blocks_multiply_const_vxx_9, 0))
         self.connect((self.blocks_multiply_const_vxx_9, 0), (self.blocks_abs_xx_1, 0))
@@ -554,6 +582,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.low_pass_filter_0, 0), (self.analog_rail_ff_0, 0))
         self.connect((self.low_pass_filter_1, 0), (self.blocks_multiply_const_vxx_4, 0))
         self.connect((self.low_pass_filter_1, 0), (self.blocks_null_sink_0, 0))
+        self.connect((self.low_pass_filter_2, 0), (self.blocks_multiply_const_vxx_7_0, 0))
+        self.connect((self.low_pass_filter_2_0, 0), (self.blocks_multiply_const_vxx_6_0, 0))
         self.connect((self.rational_resampler_xxx_1, 0), (self.blocks_null_sink_1_0, 0))
         self.connect((self.rational_resampler_xxx_2, 0), (self.blocks_delay_0, 0))
         self.connect((self.zeromq_req_source_0, 0), (self.blocks_complex_to_float_0, 0))
@@ -574,6 +604,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
         self.high_pass_filter_0.set_taps(firdes.high_pass(1, self.samp_rate, 500, 250, firdes.WIN_KAISER, 6.76))
         self.high_pass_filter_0_1.set_taps(firdes.high_pass(1, self.samp_rate, 500, 250, firdes.WIN_KAISER, 6.76))
+        self.low_pass_filter_2.set_taps(firdes.low_pass(1, self.samp_rate, 1e3, 3e3, firdes.WIN_HAMMING, 6.76))
+        self.low_pass_filter_2_0.set_taps(firdes.low_pass(1, self.samp_rate, 1e3, 3e3, firdes.WIN_HAMMING, 6.76))
 
     def get_decimation(self):
         return self.decimation
@@ -633,8 +665,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
 
     def set_dry(self, dry):
         self.dry = dry
-        self.blocks_multiply_const_vxx_6.set_k(self.ctrl_envelope+self.dry)
-        self.blocks_multiply_const_vxx_7.set_k(self.ctrl_envelope+self.dry)
+        self.blocks_multiply_const_vxx_6.set_k(self.dry)
+        self.blocks_multiply_const_vxx_7.set_k(self.dry)
 
     def get_diode_drop(self):
         return self.diode_drop
@@ -669,8 +701,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
 
     def set_ctrl_envelope(self, ctrl_envelope):
         self.ctrl_envelope = ctrl_envelope
-        self.blocks_multiply_const_vxx_6.set_k(self.ctrl_envelope+self.dry)
-        self.blocks_multiply_const_vxx_7.set_k(self.ctrl_envelope+self.dry)
+        self.blocks_multiply_const_vxx_6_0.set_k(self.ctrl_envelope)
+        self.blocks_multiply_const_vxx_7_0.set_k(self.ctrl_envelope)
 
     def get_ctrl_delay(self):
         return self.ctrl_delay
