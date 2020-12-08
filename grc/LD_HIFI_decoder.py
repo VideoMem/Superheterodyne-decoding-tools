@@ -94,18 +94,22 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.center_freq = center_freq = -1987
         self.carrierR_fine = carrierR_fine = -112
         self.carrierL_fine = carrierL_fine = 0
+        self.brightener = brightener = 0.333
         self.VCO_deviation = VCO_deviation = 300e3
         self.R_carrier_ref = R_carrier_ref = 178.75 * Fh
         self.L_carrier_ref = L_carrier_ref = 146.25* Fh
-        self.volume = volume = 0.7
+        self.wet_signal = wet_signal = brightener
+        self.volume = volume = 0.65
         self.sharpness = sharpness = int(VCO_deviation/2)
         self.right_squelch = right_squelch = 0
         self.right_balance = right_balance = 1-left_balance
         self.op_VCO_deviation = op_VCO_deviation = VCO_deviation/3
+        self.lo_audio_cut = lo_audio_cut = 10
         self.left_squelch = left_squelch = 0
         self.if_rate = if_rate = nearest.power(samp_rate/4,2)
         self.half_VCO_deviation = half_VCO_deviation = VCO_deviation/2
         self.fh_comb_delay = fh_comb_delay = round(audio_rate/(2*Fh))
+        self.dry_signal = dry_signal = 1 - brightener
         self.decimator = decimator = 2
         self.R_carrier = R_carrier = R_carrier_ref + carrierR_fine + center_freq
         self.RMS_threshold = RMS_threshold = 0.1
@@ -138,7 +142,7 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.tabs_layout_3.addLayout(self.tabs_grid_layout_3)
         self.tabs.addTab(self.tabs_widget_3, 'Input')
         self.top_grid_layout.addWidget(self.tabs)
-        self._volume_range = Range(0, 2, 0.01, 0.7, 200)
+        self._volume_range = Range(0, 2, 0.01, 0.65, 200)
         self._volume_win = RangeWidget(self._volume_range, self.set_volume, 'Volume', "counter_slider", float)
         self.tabs_grid_layout_0.addWidget(self._volume_win, 0, 1, 1, 1)
         for r in range(0, 1):
@@ -377,7 +381,7 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/vault/Belinda-Runaway_CLV_NTSC_side1__2020-11-22_17-22-25.ldf')
+        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/Downloads/VTR/LD/imgs/belinda.cs.ldf')
         def _left_squelch_probe():
             while True:
 
@@ -414,6 +418,13 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
             self.tabs_grid_layout_0.setRowStretch(r, 1)
         for c in range(0, 1):
             self.tabs_grid_layout_0.setColumnStretch(c, 1)
+        self._brightener_range = Range(0, 1, 0.01, 0.333, 200)
+        self._brightener_win = RangeWidget(self._brightener_range, self.set_brightener, 'Brightener', "counter_slider", float)
+        self.tabs_grid_layout_0.addWidget(self._brightener_win, 4, 1, 1, 1)
+        for r in range(4, 5):
+            self.tabs_grid_layout_0.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.tabs_grid_layout_0.setColumnStretch(c, 1)
         self.blocks_wavfile_sink_0 = blocks.wavfile_sink('demodulated_hifi.wav', 2, round(audio_rate), 16)
         self.blocks_threshold_ff_0_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
         self.blocks_threshold_ff_0 = blocks.threshold_ff(RMS_threshold*volume, RMS_threshold*volume, 0)
@@ -425,24 +436,30 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.blocks_rms_xx_0_0_0 = blocks.rms_ff(1/RMS_average)
         self.blocks_rms_xx_0_0 = blocks.rms_ff(1/1024)
         self.blocks_rms_xx_0 = blocks.rms_ff(1/1024)
+        self.blocks_multiply_const_vxx_9 = blocks.multiply_const_ff(wet_signal)
+        self.blocks_multiply_const_vxx_8 = blocks.multiply_const_ff(wet_signal)
+        self.blocks_multiply_const_vxx_7 = blocks.multiply_const_ff(dry_signal)
+        self.blocks_multiply_const_vxx_6 = blocks.multiply_const_ff(dry_signal)
         self.blocks_multiply_const_vxx_5 = blocks.multiply_const_ff(10)
         self.blocks_multiply_const_vxx_4 = blocks.multiply_const_ff(0.001)
-        self.blocks_multiply_const_vxx_3_0 = blocks.multiply_const_ff(0.5)
-        self.blocks_multiply_const_vxx_3 = blocks.multiply_const_ff(0.5)
+        self.blocks_multiply_const_vxx_3_0 = blocks.multiply_const_ff(-0.5)
+        self.blocks_multiply_const_vxx_3 = blocks.multiply_const_ff(-0.5)
         self.blocks_multiply_const_vxx_2 = blocks.multiply_const_ff(20)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_ff(20)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_ff(0.35*volume)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(0.35*volume)
-        self.blocks_moving_average_xx_0_0_0 = blocks.moving_average_ff(round(audio_rate /  30), 1/round(audio_rate / 30), 4000, 1)
-        self.blocks_moving_average_xx_0_0 = blocks.moving_average_ff(round(audio_rate /  30), 1/round(audio_rate / 30), 4000, 1)
+        self.blocks_moving_average_xx_0_0_0 = blocks.moving_average_ff(round(audio_rate / lo_audio_cut), 1/round(audio_rate / lo_audio_cut), 4000, 1)
+        self.blocks_moving_average_xx_0_0 = blocks.moving_average_ff(round(audio_rate /  lo_audio_cut), 1/round(audio_rate / lo_audio_cut), 4000, 1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff(round(if_rate /  FM_HPF), 1/round(if_rate / FM_HPF), 4000, 1)
         self.blocks_float_to_complex_1 = blocks.float_to_complex(1)
-        self.blocks_delay_1_0_0 = blocks.delay(gr.sizeof_float*1, round(audio_rate /  30))
-        self.blocks_delay_1_0 = blocks.delay(gr.sizeof_float*1, round(audio_rate /  30))
+        self.blocks_delay_1_0_0 = blocks.delay(gr.sizeof_float*1, round(audio_rate /  lo_audio_cut))
+        self.blocks_delay_1_0 = blocks.delay(gr.sizeof_float*1, round(audio_rate /  lo_audio_cut))
         self.blocks_delay_1 = blocks.delay(gr.sizeof_float*1, round(if_rate /  FM_HPF))
         self.blocks_delay_0_0 = blocks.delay(gr.sizeof_float*1, fh_comb_delay)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, fh_comb_delay)
         self.blocks_complex_to_real_0 = blocks.complex_to_real(1)
+        self.blocks_add_xx_4 = blocks.add_vff(1)
+        self.blocks_add_xx_3 = blocks.add_vff(1)
         self.blocks_add_xx_2_0 = blocks.add_vff(1)
         self.blocks_add_xx_2 = blocks.add_vff(1)
         self.blocks_add_xx_1 = blocks.add_vcc(1)
@@ -469,10 +486,10 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
                 14))
         self._balance_range = Range(0.25, 0.75, 0.01, 0.5, 200)
         self._balance_win = RangeWidget(self._balance_range, self.set_balance, 'Balance', "counter_slider", float)
-        self.tabs_grid_layout_0.addWidget(self._balance_win, 4, 0, 1, 2)
+        self.tabs_grid_layout_0.addWidget(self._balance_win, 4, 0, 1, 1)
         for r in range(4, 5):
             self.tabs_grid_layout_0.setRowStretch(r, 1)
-        for c in range(0, 2):
+        for c in range(0, 1):
             self.tabs_grid_layout_0.setColumnStretch(c, 1)
         self.analog_sig_source_x_0_0 = analog.sig_source_f(if_rate, analog.GR_COS_WAVE, R_carrier, 1, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_f(if_rate, analog.GR_COS_WAVE, L_carrier, 1, 0, 0)
@@ -490,10 +507,12 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_fm_deemph_0, 0), (self.rational_resampler_xxx_1, 0))
-        self.connect((self.analog_fm_deemph_0_0, 0), (self.rational_resampler_xxx_1_0, 0))
+        self.connect((self.analog_fm_deemph_0, 0), (self.blocks_multiply_const_vxx_6, 0))
+        self.connect((self.analog_fm_deemph_0_0, 0), (self.blocks_multiply_const_vxx_7, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.analog_fm_deemph_0, 0))
+        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.blocks_multiply_const_vxx_8, 0))
         self.connect((self.analog_quadrature_demod_cf_0_0, 0), (self.analog_fm_deemph_0_0, 0))
+        self.connect((self.analog_quadrature_demod_cf_0_0, 0), (self.blocks_multiply_const_vxx_9, 0))
         self.connect((self.analog_rail_ff_1_1, 0), (self.blocks_float_to_complex_1, 0))
         self.connect((self.analog_rail_ff_1_1, 0), (self.blocks_wavfile_sink_0, 0))
         self.connect((self.analog_rail_ff_1_1, 0), (self.qtgui_waterfall_sink_x_0, 0))
@@ -514,6 +533,8 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_add_xx_1, 0), (self.blocks_complex_to_real_0, 0))
         self.connect((self.blocks_add_xx_2, 0), (self.blocks_multiply_const_vxx_3, 0))
         self.connect((self.blocks_add_xx_2_0, 0), (self.blocks_multiply_const_vxx_3_0, 0))
+        self.connect((self.blocks_add_xx_3, 0), (self.rational_resampler_xxx_1, 0))
+        self.connect((self.blocks_add_xx_4, 0), (self.rational_resampler_xxx_1_0, 0))
         self.connect((self.blocks_complex_to_real_0, 0), (self.blocks_multiply_const_vxx_4, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_add_xx_2, 1))
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_add_xx_2_0, 1))
@@ -535,6 +556,10 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_4, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_multiply_const_vxx_5, 0), (self.band_pass_filter_0, 0))
         self.connect((self.blocks_multiply_const_vxx_5, 0), (self.band_pass_filter_0_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_6, 0), (self.blocks_add_xx_3, 0))
+        self.connect((self.blocks_multiply_const_vxx_7, 0), (self.blocks_add_xx_4, 0))
+        self.connect((self.blocks_multiply_const_vxx_8, 0), (self.blocks_add_xx_3, 1))
+        self.connect((self.blocks_multiply_const_vxx_9, 0), (self.blocks_add_xx_4, 1))
         self.connect((self.blocks_rms_xx_0, 0), (self.blocks_multiply_const_vxx_1, 0))
         self.connect((self.blocks_rms_xx_0_0, 0), (self.blocks_multiply_const_vxx_2, 0))
         self.connect((self.blocks_rms_xx_0_0_0, 0), (self.blocks_threshold_ff_0_0, 0))
@@ -601,10 +626,10 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.audio_rate = audio_rate
         self.set_fh_comb_delay(round(self.audio_rate/(2*self.Fh)))
         self.set_pop_len(self.audio_rate*(self.pop_time/2))
-        self.blocks_delay_1_0.set_dly(round(self.audio_rate /  30))
-        self.blocks_delay_1_0_0.set_dly(round(self.audio_rate /  30))
-        self.blocks_moving_average_xx_0_0.set_length_and_scale(round(self.audio_rate /  30), 1/round(self.audio_rate / 30))
-        self.blocks_moving_average_xx_0_0_0.set_length_and_scale(round(self.audio_rate /  30), 1/round(self.audio_rate / 30))
+        self.blocks_delay_1_0.set_dly(round(self.audio_rate /  self.lo_audio_cut))
+        self.blocks_delay_1_0_0.set_dly(round(self.audio_rate /  self.lo_audio_cut))
+        self.blocks_moving_average_xx_0_0.set_length_and_scale(round(self.audio_rate /  self.lo_audio_cut), 1/round(self.audio_rate / self.lo_audio_cut))
+        self.blocks_moving_average_xx_0_0_0.set_length_and_scale(round(self.audio_rate / self.lo_audio_cut), 1/round(self.audio_rate / self.lo_audio_cut))
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.audio_rate)
 
     def get_Fh(self):
@@ -659,6 +684,14 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.carrierL_fine = carrierL_fine
         self.set_L_carrier(self.L_carrier_ref + self.carrierL_fine + self.center_freq)
 
+    def get_brightener(self):
+        return self.brightener
+
+    def set_brightener(self, brightener):
+        self.brightener = brightener
+        self.set_dry_signal(1 - self.brightener)
+        self.set_wet_signal(self.brightener)
+
     def get_VCO_deviation(self):
         return self.VCO_deviation
 
@@ -685,6 +718,14 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
     def set_L_carrier_ref(self, L_carrier_ref):
         self.L_carrier_ref = L_carrier_ref
         self.set_L_carrier(self.L_carrier_ref + self.carrierL_fine + self.center_freq)
+
+    def get_wet_signal(self):
+        return self.wet_signal
+
+    def set_wet_signal(self, wet_signal):
+        self.wet_signal = wet_signal
+        self.blocks_multiply_const_vxx_8.set_k(self.wet_signal)
+        self.blocks_multiply_const_vxx_9.set_k(self.wet_signal)
 
     def get_volume(self):
         return self.volume
@@ -724,6 +765,16 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
     def set_op_VCO_deviation(self, op_VCO_deviation):
         self.op_VCO_deviation = op_VCO_deviation
 
+    def get_lo_audio_cut(self):
+        return self.lo_audio_cut
+
+    def set_lo_audio_cut(self, lo_audio_cut):
+        self.lo_audio_cut = lo_audio_cut
+        self.blocks_delay_1_0.set_dly(round(self.audio_rate /  self.lo_audio_cut))
+        self.blocks_delay_1_0_0.set_dly(round(self.audio_rate /  self.lo_audio_cut))
+        self.blocks_moving_average_xx_0_0.set_length_and_scale(round(self.audio_rate /  self.lo_audio_cut), 1/round(self.audio_rate / self.lo_audio_cut))
+        self.blocks_moving_average_xx_0_0_0.set_length_and_scale(round(self.audio_rate / self.lo_audio_cut), 1/round(self.audio_rate / self.lo_audio_cut))
+
     def get_left_squelch(self):
         return self.left_squelch
 
@@ -759,6 +810,14 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
         self.fh_comb_delay = fh_comb_delay
         self.blocks_delay_0.set_dly(self.fh_comb_delay)
         self.blocks_delay_0_0.set_dly(self.fh_comb_delay)
+
+    def get_dry_signal(self):
+        return self.dry_signal
+
+    def set_dry_signal(self, dry_signal):
+        self.dry_signal = dry_signal
+        self.blocks_multiply_const_vxx_6.set_k(self.dry_signal)
+        self.blocks_multiply_const_vxx_7.set_k(self.dry_signal)
 
     def get_decimator(self):
         return self.decimator
