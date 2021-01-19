@@ -607,7 +607,26 @@ blocks:
     bus_structure: null
     coordinate: [3224, 904.0]
     rotation: 0
-    state: disabled
+    state: enabled
+- name: audio_source_0
+  id: audio_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: default
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    ok_to_block: 'True'
+    samp_rate: round(samp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 312.0]
+    rotation: 0
+    state: true
 - name: blocks_abs_xx_0
   id: blocks_abs_xx
   parameters:
@@ -1069,7 +1088,7 @@ blocks:
     bus_structure: null
     coordinate: [488, 408.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_delay_0
   id: blocks_delay
   parameters:
@@ -2269,7 +2288,7 @@ blocks:
     alias: ''
     bits_per_sample: '16'
     comment: ''
-    file: CX_decoded_output.wav
+    file: CX_decoded_output_r.wav
     nchan: '2'
     samp_rate: round(samp_rate)
   states:
@@ -2278,14 +2297,14 @@ blocks:
     bus_structure: null
     coordinate: [3544, 900.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_wavfile_source_0
   id: blocks_wavfile_source
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    file: vhs_hifi_test.wav
+    file: /home/sebastian/Downloads/VTR/HIFI/vr/vrinternational.wav
     maxoutbuf: '0'
     minoutbuf: '0'
     nchan: '2'
@@ -2521,7 +2540,7 @@ blocks:
     label7: ''
     label8: ''
     label9: ''
-    max: '1'
+    max: '2'
     min: '0'
     name: ''
     nconnections: '1'
@@ -3357,7 +3376,7 @@ blocks:
     bus_structure: null
     coordinate: [176, 404.0]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [analog_const_source_x_0, '0', blocks_multiply_xx_0_0, '1']
@@ -3385,6 +3404,8 @@ connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_2, '1']
 - [analog_sig_source_x_0, '0', rational_resampler_xxx_1, '0']
 - [analog_sig_source_x_0_0, '0', blocks_multiply_xx_2, '0']
+- [audio_source_0, '0', blocks_multiply_xx_5_0, '0']
+- [audio_source_0, '1', blocks_multiply_xx_5_0_0, '0']
 - [blocks_abs_xx_0, '0', blocks_multiply_const_vxx_0, '0']
 - [blocks_abs_xx_0_0, '0', blocks_multiply_const_vxx_0_0, '0']
 - [blocks_abs_xx_1, '0', blocks_multiply_const_vxx_9_1, '0']

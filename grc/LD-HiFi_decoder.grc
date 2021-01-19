@@ -1357,7 +1357,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [248, 608.0]
+    coordinate: [176, 608.0]
     rotation: 0
     state: disabled
 - name: blocks_rms_xx_0
@@ -1625,7 +1625,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    command: ld-ldf-reader ~/Downloads/VTR/LD/imgs/belinda.cs.ldf
+    command: ld-ldf-reader ~/vault/Karaoke_1_CLV_NTSC.ldf
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -2093,7 +2093,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [96, 636.0]
+    coordinate: [96, 676.0]
     rotation: 0
     state: true
 - name: virtual_sink_0

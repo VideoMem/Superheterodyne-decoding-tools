@@ -29,6 +29,7 @@ from gnuradio.filter import firdes
 import sip
 from fractions import Fraction
 from gnuradio import analog
+from gnuradio import audio
 from gnuradio import blocks
 from gnuradio import filter
 from gnuradio import gr
@@ -37,7 +38,6 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-from gnuradio import zeromq
 from gnuradio.qtgui import Range, RangeWidget
 import math
 import time
@@ -161,7 +161,6 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self._bass_boost_callback(self.bass_boost)
         _bass_boost_check_box.stateChanged.connect(lambda i: self.set_bass_boost(self._bass_boost_choices[bool(i)]))
         self.tabs_layout_1.addWidget(_bass_boost_check_box)
-        self.zeromq_req_source_0 = zeromq.req_source(gr.sizeof_gr_complex, 1, 'tcp://localhost:5555', 1000, False, -1)
         self.rational_resampler_xxx_2 = filter.rational_resampler_fff(
                 interpolation=1,
                 decimation=decimation,
@@ -272,7 +271,7 @@ class CX_NR(gr.top_block, Qt.QWidget):
 
         for i in range(1):
             self.qtgui_number_sink_0.set_min(i, 0)
-            self.qtgui_number_sink_0.set_max(i, 1)
+            self.qtgui_number_sink_0.set_max(i, 2)
             self.qtgui_number_sink_0.set_color(i, colors[i][0], colors[i][1])
             if len(labels[i]) == 0:
                 self.qtgui_number_sink_0.set_label(i, "Data {0}".format(i))
@@ -338,7 +337,6 @@ class CX_NR(gr.top_block, Qt.QWidget):
                 250,
                 firdes.WIN_KAISER,
                 6.76))
-        self.blocks_wavfile_sink_0 = blocks.wavfile_sink('CX_decoded_output.wav', 2, round(samp_rate), 16)
         self.blocks_threshold_ff_1_1_0 = blocks.threshold_ff(0, 0, 0)
         self.blocks_threshold_ff_1_1 = blocks.threshold_ff(0, 0, 0)
         self.blocks_threshold_ff_1_0_2 = blocks.threshold_ff(diode_drop, diode_drop, 0)
@@ -406,7 +404,6 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.blocks_delay_0_0_0 = blocks.delay(gr.sizeof_float*1, ctrl_delay)
         self.blocks_delay_0_0 = blocks.delay(gr.sizeof_float*1, ctrl_delay)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, ctrl_delay)
-        self.blocks_complex_to_float_0 = blocks.complex_to_float(1)
         self.blocks_add_xx_9_0 = blocks.add_vff(1)
         self.blocks_add_xx_9 = blocks.add_vff(1)
         self.blocks_add_xx_8 = blocks.add_vff(1)
@@ -432,6 +429,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.blocks_abs_xx_1 = blocks.abs_ff(1)
         self.blocks_abs_xx_0_0 = blocks.abs_ff(1)
         self.blocks_abs_xx_0 = blocks.abs_ff(1)
+        self.audio_source_0 = audio.source(round(samp_rate), 'default', True)
+        self.audio_sink_0 = audio.sink(round(samp_rate), '', True)
         self.analog_sig_source_x_0_0 = analog.sig_source_f(samp_rate, analog.GR_SIN_WAVE, 876, test_gain/6, 0, 0)
         self.analog_sig_source_x_0 = analog.sig_source_f(samp_rate, analog.GR_SQR_WAVE, 1/2, 1, 0, 0)
         self.analog_rail_ff_1 = analog.rail_ff(0, 2 - dry)
@@ -483,6 +482,8 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_2, 1))
         self.connect((self.analog_sig_source_x_0, 0), (self.rational_resampler_xxx_1, 0))
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_multiply_xx_2, 0))
+        self.connect((self.audio_source_0, 0), (self.blocks_multiply_xx_5_0, 0))
+        self.connect((self.audio_source_0, 1), (self.blocks_multiply_xx_5_0_0, 0))
         self.connect((self.blocks_abs_xx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.blocks_abs_xx_0_0, 0), (self.blocks_multiply_const_vxx_0_0, 0))
         self.connect((self.blocks_abs_xx_1, 0), (self.blocks_multiply_const_vxx_9_1, 0))
@@ -513,8 +514,6 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_add_xx_8, 0), (self.blocks_multiply_const_vxx_8, 0))
         self.connect((self.blocks_add_xx_9, 0), (self.blocks_multiply_const_vxx_7_0, 0))
         self.connect((self.blocks_add_xx_9_0, 0), (self.blocks_multiply_const_vxx_6_0, 0))
-        self.connect((self.blocks_complex_to_float_0, 0), (self.blocks_multiply_xx_5_0, 0))
-        self.connect((self.blocks_complex_to_float_0, 1), (self.blocks_multiply_xx_5_0_0, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_null_sink_1_0, 1))
         self.connect((self.blocks_delay_0, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_delay_0_0, 0), (self.blocks_multiply_const_vxx_10, 0))
@@ -552,10 +551,10 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_7_0, 0), (self.blocks_add_xx_7, 1))
         self.connect((self.blocks_multiply_const_vxx_8, 0), (self.blocks_multiply_const_vxx_9_0, 0))
         self.connect((self.blocks_multiply_const_vxx_8_0, 0), (self.blocks_multiply_const_vxx_9, 0))
+        self.connect((self.blocks_multiply_const_vxx_9, 0), (self.audio_sink_0, 0))
         self.connect((self.blocks_multiply_const_vxx_9, 0), (self.blocks_abs_xx_1, 0))
-        self.connect((self.blocks_multiply_const_vxx_9, 0), (self.blocks_wavfile_sink_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_9_0, 0), (self.audio_sink_0, 1))
         self.connect((self.blocks_multiply_const_vxx_9_0, 0), (self.blocks_abs_xx_1_1, 0))
-        self.connect((self.blocks_multiply_const_vxx_9_0, 0), (self.blocks_wavfile_sink_0, 1))
         self.connect((self.blocks_multiply_const_vxx_9_1, 0), (self.qtgui_number_sink_1, 0))
         self.connect((self.blocks_multiply_const_vxx_9_1_0, 0), (self.qtgui_number_sink_1, 1))
         self.connect((self.blocks_multiply_xx_0, 0), (self.blocks_add_xx_0, 0))
@@ -614,7 +613,6 @@ class CX_NR(gr.top_block, Qt.QWidget):
         self.connect((self.low_pass_filter_3, 0), (self.blocks_multiply_xx_6, 0))
         self.connect((self.rational_resampler_xxx_1, 0), (self.blocks_null_sink_1_0, 0))
         self.connect((self.rational_resampler_xxx_2, 0), (self.blocks_delay_0, 0))
-        self.connect((self.zeromq_req_source_0, 0), (self.blocks_complex_to_float_0, 0))
 
 
     def closeEvent(self, event):

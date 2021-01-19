@@ -381,7 +381,7 @@ class LD_HIFI_decoder(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.tabs_layout_0.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/Downloads/VTR/LD/imgs/belinda.cs.ldf')
+        self.pipe_source_1 = pipe.source(gr.sizeof_short*1, 'ld-ldf-reader ~/vault/Karaoke_1_CLV_NTSC.ldf')
         def _left_squelch_probe():
             while True:
 
