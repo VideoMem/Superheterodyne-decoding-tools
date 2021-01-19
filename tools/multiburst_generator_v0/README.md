@@ -1,6 +1,19 @@
 Based on:
 https://web.archive.org/web/20141031003122/http://www1.tek.com/Measurement/cgi-bin/framed.pl?Document=%2FMeasurement%2FApp_Notes%2FNTSC_Video_Msmt%2Fvideotesting2.html
 
+Generates standard multiburst test chart for VTR testing (no PCM adaptor DC equalization pulses)
+```
+$ python3 multiburst_generator.py -w 70 -b 10 -d 1 -s 4 -o multiburst.bmp
+```
+
+Generates multiburst test chart for VTR testing (with PCM adaptor DC equalization pulses)
+```
+$ python3 multiburst_generator.py -s 4 -o multiburstPCM.bmp
+```
+
+Don't use the -l parameter (not stable yet)\
+Use the scale factor -s instead to get a bigger resolution chart\
+Once the chart is scaled to the target resolution all the burst frequencies should be on spec.
 
 ```
 
@@ -32,3 +45,5 @@ optional arguments:
   -o [OUTPUT], --output [OUTPUT]
                         write to file (default, None)
 ```
+
+[VTR_test_multiburst image](VTR_test_multiburst.bmp)
