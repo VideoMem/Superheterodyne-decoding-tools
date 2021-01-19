@@ -1,3 +1,7 @@
+Based on:
+https://web.archive.org/web/20141031003122/http://www1.tek.com/Measurement/cgi-bin/framed.pl?Document=%2FMeasurement%2FApp_Notes%2FNTSC_Video_Msmt%2Fvideotesting2.html
+
+
 ```
 
 $ python3 multiburst_generator.py --help
