@@ -46,4 +46,4 @@ optional arguments:
                         write to file (default, None)
 ```
 
-[VTR_test_multiburst image](VTR_test_multiburst.bmp)
+![VTR_test_multiburst image](VTR_test_multiburst.bmp)
