@@ -1,6 +1,7 @@
 from scipy import signal
 from fractions import Fraction
-
+from samplerate import resample
+import numpy as np
 
 class Arbitrary:
 
@@ -28,3 +29,17 @@ class Arbitrary:
         n, d = self.rationalize(rate / self.rate)
         return self.rational_resample(data, d, n)
 
+    def ratio(self, rate):
+        return rate / self.rate
+
+    def linear(self, data, rate):
+        return resample(data, self.ratio(rate), converter_type='linear')
+
+    def naive(self, data, rate):
+        return resample(data, self.ratio(rate), converter_type='zero_order_hold')
+
+    def sinc(self, data, rate):
+        return resample(data, self.ratio(rate), converter_type='sinc_fastest')
+
+    def best(self, data, rate):
+        return resample(data, self.ratio(rate), converter_type='sinc_best')
