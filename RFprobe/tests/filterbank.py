@@ -8,7 +8,6 @@ import nearest
 def LOGLEVEL():
     return 2
 
-
 def LOG(level, txt):
     if level < LOGLEVEL():
         print(txt)
@@ -155,7 +154,7 @@ class FilterBank:
         plt.semilogx(w, 20 * np.log10(abs(h)))
         ax1 = fig.add_subplot()
         plt.ylim([-42, 3])
-        plt.xlim([800e3, sample_specs.nyq()])
+        plt.xlim([300e3, sample_specs.nyq()])
         plt.title('Butterworth IIR %s fit to\n%s' % (type, title))
         plt.xlabel('Frequency [Hz]')
         plt.ylabel('Amplitude [dB]')
@@ -200,6 +199,32 @@ class IIR_FilterBank(FilterBank):
         if LOGLEVEL() > 2:
             self.plot(sample_specs, iir_b, iir_a, identifier, 'lowpass')
         return { 'iir_b':iir_b, 'iir_a':iir_a }
+
+    def get_dc_highpass_params(self, filt, sample_specs):
+        passband = filt['fc']
+        stopband = filt['fc'] - filt['transition']
+        max_loss_passband = 3  # The maximum loss allowed in the passband
+        min_loss_stopband = 30  # The minimum loss allowed in the stopband
+        order, normal_cutoff = signal.buttord(passband, stopband, max_loss_passband,
+                                              min_loss_stopband, sample_specs.fs())
+        return passband, stopband, order, normal_cutoff
+
+    def get_dc_remover(self, sample_specs):
+        LD = LD_NTSC()
+        filt = { 'type': 'HPF', 'fc': LD.FM_HPF(), 'transition': LD.FM_HPF() / 2 }
+        identifier = 'AFE DC removal HPF'
+        passband, stopband, order, normal_cutoff = self.get_dc_highpass_params(filt, sample_specs)
+        if order > 2:
+            order = 2
+        LOG(1, '+ DC remover -> HighPass from %s, stopband %s, Butterworth order: %d' % (passband, stopband, order))
+        iir_b, iir_a = signal.butter(order, normal_cutoff, btype="highpass", fs=sample_specs.fs())
+        if LOGLEVEL() > 2:
+            self.plot(sample_specs, iir_b, iir_a, identifier, 'highpass')
+        return {
+            'sample_specs': sample_specs,
+            'identifier': identifier,
+            'handler': {'iir_b': iir_b, 'iir_a': iir_a}
+        }
 
     def channel_count(self):
         channel_count = 0
@@ -253,5 +278,14 @@ def filterbank():
     LOG(2, filters)
     return filters
 
+
+def DC_blocking():
+    filters_parameters = FilterStack()
+    sample_specs = SSpecs()
+    IIRbank = IIR_FilterBank(filters_parameters)
+    return IIRbank.get_dc_remover(sample_specs)
+
+
 if __name__ == '__main__':
     filterbank()
+    DC_blocking()

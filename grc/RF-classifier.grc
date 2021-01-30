@@ -628,7 +628,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [408, 1732.0]
+    coordinate: [400, 1752.0]
     rotation: 0
     state: enabled
 - name: blocks_add_const_vxx_0

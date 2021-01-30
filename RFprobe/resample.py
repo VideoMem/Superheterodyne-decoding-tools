@@ -1,7 +1,6 @@
 from scipy import signal
 from fractions import Fraction
 from samplerate import resample
-import numpy as np
 
 class Arbitrary:
 

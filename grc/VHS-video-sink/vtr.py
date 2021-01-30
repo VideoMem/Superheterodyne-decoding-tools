@@ -83,37 +83,39 @@ class vtr(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.in_rate = in_rate = 35812500
+        self.in_rate = in_rate = 28636363
         self.Fh = Fh = 15.625e3
         self.samples_per_line = samples_per_line = in_rate/Fh
         self.interpolator = interpolator = 2
         self.samp_rate = samp_rate = in_rate*interpolator
-        self.luma_fm_carrier = luma_fm_carrier = Fh * (284-1/4) + Fh/625
-        self.lines_per_frame = lines_per_frame = 624
-        self.if_lo_reference_fc = if_lo_reference_fc = 40*Fh+(Fh/8)
+        self.luma_fm_carrier = luma_fm_carrier = 5857143
+        self.lines_per_frame = lines_per_frame = 525
+        self.if_lo_reference_fc = if_lo_reference_fc = 688373
         self.disp_width = disp_width = nearest.power(samples_per_line,2)/2
         self.chroma_fine = chroma_fine = 0
         self.chroma_coarse = chroma_coarse = 0
-        self.vco_deviation = vco_deviation = 1e6
-        self.sharpener = sharpener = 0.06
+        self.vco_deviation = vco_deviation = 1.6e6
+        self.sharpener = sharpener = 0.00
         self.one_line_samples = one_line_samples = nearest.power(samp_rate/Fh,2)
         self.luma_min_probe = luma_min_probe = 0
         self.luma_fm_carrier_filter_peak = luma_fm_carrier_filter_peak = 5.4886e6
+        self.luma_coarse = luma_coarse = 0
         self.lines_per_field = lines_per_field = lines_per_frame/2
         self.line_average = line_average = 2
         self.fh_comb_delay = fh_comb_delay = samp_rate/(Fh*8)
         self.display_scale = display_scale = samples_per_line / disp_width
         self.disp_height = disp_height = lines_per_frame
-        self.contrast = contrast = 2.700
-        self.comb_gain = comb_gain = 0.1
+        self.contrast = contrast = 1.5
+        self.comb_gain = comb_gain = 0.0
         self.comb_delay = comb_delay = samp_rate/(luma_fm_carrier*4)
         self.chroma_adjusted = chroma_adjusted = if_lo_reference_fc+chroma_fine+chroma_coarse
-        self.brightness = brightness = 0.800
+        self.brightness = brightness = 0.6
         self.auto_luma_gain = auto_luma_gain = 0.1
         self.audio_rate = audio_rate = round(48e3*4)
-        self.Fv = Fv = 60
+        self.Fv = Fv = 50
         self.Fcc_Fcl = Fcc_Fcl = 455/80
         self.FM_HPF = FM_HPF = 120
+        self.DD_rate = DD_rate = 14.3182e6
 
         ##################################################
         # Blocks
@@ -142,7 +144,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.top_grid_layout.addWidget(self.tabs)
         self.luma_min = blocks.probe_signal_f()
         self.luma_gain_signal = blocks.probe_signal_f()
-        self._sharpener_range = Range(0, 0.2, 0.001, 0.06, 200)
+        self._sharpener_range = Range(0, 0.2, 0.001, 0.00, 200)
         self._sharpener_win = RangeWidget(self._sharpener_range, self.set_sharpener, 'Sharpness', "counter_slider", float)
         self.tabs_grid_layout_0.addWidget(self._sharpener_win, 2, 0, 1, 1)
         for r in range(2, 3):
@@ -162,20 +164,23 @@ class vtr(gr.top_block, Qt.QWidget):
         _luma_min_probe_thread.daemon = True
         _luma_min_probe_thread.start()
 
-        self._contrast_range = Range(0, 6, 0.1, 2.700, 200)
+        self._luma_coarse_range = Range(-1e6, 1e6, 1, 0, 200)
+        self._luma_coarse_win = RangeWidget(self._luma_coarse_range, self.set_luma_coarse, 'Y Coarse', "counter_slider", float)
+        self.tabs_layout_0.addWidget(self._luma_coarse_win)
+        self._contrast_range = Range(0, 6, 0.1, 1.5, 200)
         self._contrast_win = RangeWidget(self._contrast_range, self.set_contrast, 'Contrast bias', "counter_slider", float)
         self.tabs_grid_layout_0.addWidget(self._contrast_win, 4, 0, 1, 1)
         for r in range(4, 5):
             self.tabs_grid_layout_0.setRowStretch(r, 1)
         for c in range(0, 1):
             self.tabs_grid_layout_0.setColumnStretch(c, 1)
-        self._comb_gain_range = Range(0, 0.2, 0.001, 0.1, 200)
+        self._comb_gain_range = Range(0, 0.2, 0.001, 0.0, 200)
         self._comb_gain_win = RangeWidget(self._comb_gain_range, self.set_comb_gain, 'Comb gain', "counter_slider", float)
         self.tabs_layout_2.addWidget(self._comb_gain_win)
         self._comb_delay_range = Range(0, samp_rate/luma_fm_carrier, 1, samp_rate/(luma_fm_carrier*4), 200)
         self._comb_delay_win = RangeWidget(self._comb_delay_range, self.set_comb_delay, 'Comb filter delay', "counter_slider", float)
         self.tabs_layout_2.addWidget(self._comb_delay_win)
-        self._brightness_range = Range(-2, 2, 0.1, 0.800, 200)
+        self._brightness_range = Range(-2, 2, 0.1, 0.6, 200)
         self._brightness_win = RangeWidget(self._brightness_range, self.set_brightness, 'Brightness bias', "counter_slider", float)
         self.tabs_grid_layout_0.addWidget(self._brightness_win, 5, 0, 1, 1)
         for r in range(5, 6):
@@ -196,6 +201,11 @@ class vtr(gr.top_block, Qt.QWidget):
         _auto_luma_gain_thread.start()
 
         self.video_sdl_sink_0 = video_sdl.sink_uc(Fv/2, round(disp_width), round(disp_height), 0, round(disp_width), round(disp_height))
+        self.rational_resampler_xxx_3_0 = filter.rational_resampler_fff(
+                interpolation=Fraction(DD_rate/samp_rate).limit_denominator(1000).numerator,
+                decimation=Fraction(DD_rate/samp_rate).limit_denominator(1000).denominator,
+                taps=None,
+                fractional_bw=None)
         self.rational_resampler_xxx_3 = filter.rational_resampler_fff(
                 interpolation=Fraction(in_rate/samp_rate).limit_denominator(1000).numerator,
                 decimation=Fraction(in_rate/samp_rate).limit_denominator(1000).denominator,
@@ -274,7 +284,7 @@ class vtr(gr.top_block, Qt.QWidget):
         for c in range(0, 1):
             self.tabs_grid_layout_0.setColumnStretch(c, 1)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            round(samp_rate/Fv), #size
+            round(samp_rate/Fh), #size
             samp_rate, #samp_rate
             "", #name
             2 #number of inputs
@@ -507,17 +517,8 @@ class vtr(gr.top_block, Qt.QWidget):
             firdes.low_pass(
                 1,
                 samp_rate,
-                8e6,
-                8e6-luma_fm_carrier_filter_peak,
-                firdes.WIN_KAISER,
-                14))
-        self.low_pass_filter_0 = filter.fir_filter_ccf(
-            1,
-            firdes.low_pass(
-                0.2,
-                samp_rate,
-                200e3,
-                chroma_adjusted - 375e3,
+                6200000,
+                1e6,
                 firdes.WIN_KAISER,
                 14))
         self.high_pass_filter_2 = filter.fir_filter_fff(
@@ -534,20 +535,11 @@ class vtr(gr.top_block, Qt.QWidget):
             firdes.high_pass(
                 1,
                 samp_rate,
-                chroma_adjusted,
-                luma_fm_carrier_filter_peak-chroma_adjusted,
+                3500000,
+                1e6,
                 firdes.WIN_KAISER,
                 14))
-        self.high_pass_filter_0 = filter.fir_filter_ccf(
-            1,
-            firdes.high_pass(
-                0.1,
-                samp_rate,
-                10e6,
-                2e6,
-                firdes.WIN_KAISER,
-                14))
-        self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, [1], luma_fm_carrier, samp_rate)
+        self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(1, firdes.low_pass(1.0,samp_rate,4200000,1e6), luma_fm_carrier+ luma_coarse, samp_rate)
         self._chroma_fine_range = Range(-1, 1, 0.0001, 0, 200)
         self._chroma_fine_win = RangeWidget(self._chroma_fine_range, self.set_chroma_fine, 'Fine', "counter_slider", float)
         self.tabs_grid_layout_1.addWidget(self._chroma_fine_win, 2, 0, 1, 1)
@@ -562,6 +554,7 @@ class vtr(gr.top_block, Qt.QWidget):
             self.tabs_grid_layout_1.setRowStretch(r, 1)
         for c in range(0, 1):
             self.tabs_grid_layout_1.setColumnStretch(c, 1)
+        self.blocks_wavfile_sink_0 = blocks.wavfile_sink('/home/sebastian/Develop/ld-decode/grc_out.tbc.wav', 1, 44100, 16)
         self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_sub_xx_2 = blocks.sub_ff(1)
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
@@ -569,6 +562,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.blocks_stream_to_vector_1 = blocks.stream_to_vector(gr.sizeof_float*1, one_line_samples*line_average)
         self.blocks_multiply_const_vxx_7_0 = blocks.multiply_const_ff(255)
         self.blocks_multiply_const_vxx_6 = blocks.multiply_const_ff(auto_luma_gain)
+        self.blocks_multiply_const_vxx_2 = blocks.multiply_const_ff(2)
         self.blocks_multiply_const_vxx_10 = blocks.multiply_const_ff(1/64)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_ff(1/1.4)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(10)
@@ -580,14 +574,14 @@ class vtr(gr.top_block, Qt.QWidget):
         self.blocks_max_xx_0 = blocks.max_ff(one_line_samples*line_average, 1)
         self.blocks_float_to_uchar_0_0 = blocks.float_to_uchar()
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/sebastian/Downloads/VTR/captures/lg.r8', False, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/sebastian/vault/U-Matic/rf_sweep.r8', False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_divide_xx_0 = blocks.divide_ff(1)
         self.blocks_delay_1 = blocks.delay(gr.sizeof_float*1, round(samp_rate / FM_HPF))
         self.blocks_delay_0 = blocks.delay(gr.sizeof_float*1, round(comb_delay))
         self.blocks_add_xx_2_0 = blocks.add_vff(1)
         self.blocks_add_xx_2 = blocks.add_vff(1)
-        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.blocks_add_const_vxx_4 = blocks.add_const_ff(-.5)
         self.blocks_add_const_vxx_3 = blocks.add_const_ff(-128)
         self.blocks_add_const_vxx_2 = blocks.add_const_ff(0.4)
         self.blocks_add_const_vxx_1 = blocks.add_const_ff(contrast)
@@ -607,7 +601,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.analog_rail_ff_0 = analog.rail_ff(-0.4, 1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(samp_rate/(2*math.pi*vco_deviation/8.0))
         self.analog_fm_preemph_0 = analog.fm_preemph(fs=samp_rate, tau=1.25e-6, fh=-1.0)
-        self.analog_fm_deemph_0_0 = analog.fm_deemph(fs=samp_rate, tau=1.25e-6)
+        self.analog_fm_deemph_0_0 = analog.fm_deemph(fs=samp_rate, tau=0.6e-6)
         self.analog_const_source_x_2 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 1)
         self.analog_const_source_x_1_0_0 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 0)
         self.analog_const_source_x_1_0 = analog.sig_source_f(0, analog.GR_CONST_WAVE, 0, 0, 0.1)
@@ -620,9 +614,7 @@ class vtr(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_agc2_xx_0, 0), (self.high_pass_filter_0, 0))
         self.connect((self.analog_agc2_xx_0, 0), (self.high_pass_filter_1, 0))
-        self.connect((self.analog_agc2_xx_0, 0), (self.low_pass_filter_0, 0))
         self.connect((self.analog_const_source_x_1, 0), (self.qtgui_time_sink_x_2_2, 1))
         self.connect((self.analog_const_source_x_1_0, 0), (self.qtgui_time_sink_x_2_2, 2))
         self.connect((self.analog_const_source_x_1_0_0, 0), (self.qtgui_time_sink_x_2_2, 3))
@@ -640,8 +632,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_add_const_vxx_1, 0), (self.blocks_stream_to_vector_1, 0))
         self.connect((self.blocks_add_const_vxx_2, 0), (self.blocks_multiply_const_vxx_1, 0))
         self.connect((self.blocks_add_const_vxx_3, 0), (self.blocks_multiply_const_vxx_10, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-        self.connect((self.blocks_add_xx_0, 0), (self.qtgui_freq_sink_x_0_0_1, 0))
+        self.connect((self.blocks_add_const_vxx_4, 0), (self.blocks_multiply_const_vxx_2, 0))
         self.connect((self.blocks_add_xx_2, 0), (self.analog_fm_preemph_0, 0))
         self.connect((self.blocks_add_xx_2, 0), (self.band_reject_filter_0, 0))
         self.connect((self.blocks_add_xx_2_0, 0), (self.low_pass_filter_2, 0))
@@ -663,8 +654,10 @@ class vtr(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_moving_average_xx_0_2, 0), (self.qtgui_time_sink_x_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.qtgui_number_sink_1, 0))
         self.connect((self.blocks_multiply_const_vxx_1, 0), (self.rational_resampler_xxx_3, 0))
+        self.connect((self.blocks_multiply_const_vxx_1, 0), (self.rational_resampler_xxx_3_0, 0))
         self.connect((self.blocks_multiply_const_vxx_10, 0), (self.blocks_delay_1, 0))
         self.connect((self.blocks_multiply_const_vxx_10, 0), (self.blocks_moving_average_xx_0_2, 0))
+        self.connect((self.blocks_multiply_const_vxx_2, 0), (self.blocks_wavfile_sink_0, 0))
         self.connect((self.blocks_multiply_const_vxx_6, 0), (self.analog_rail_ff_0, 0))
         self.connect((self.blocks_multiply_const_vxx_7_0, 0), (self.rational_resampler_xxx_2, 0))
         self.connect((self.blocks_stream_to_vector_1, 0), (self.blocks_max_xx_0, 0))
@@ -674,11 +667,10 @@ class vtr(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_sub_xx_2, 0), (self.blocks_divide_xx_0, 1))
         self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_add_const_vxx_3, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.analog_quadrature_demod_cf_0, 0))
-        self.connect((self.high_pass_filter_0, 0), (self.blocks_add_xx_0, 2))
         self.connect((self.high_pass_filter_1, 0), (self.low_pass_filter_1, 0))
         self.connect((self.high_pass_filter_2, 0), (self.blocks_delay_0, 0))
-        self.connect((self.low_pass_filter_0, 0), (self.blocks_add_xx_0, 1))
-        self.connect((self.low_pass_filter_1, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.low_pass_filter_1, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
+        self.connect((self.low_pass_filter_1, 0), (self.qtgui_freq_sink_x_0_0_1, 0))
         self.connect((self.low_pass_filter_2, 0), (self.blocks_add_const_vxx_0, 0))
         self.connect((self.low_pass_filter_2, 0), (self.qtgui_freq_sink_x_0_0_0, 0))
         self.connect((self.low_pass_filter_2, 0), (self.rational_resampler_xxx_1, 0))
@@ -691,6 +683,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.connect((self.rational_resampler_xxx_1_0, 0), (self.blocks_stream_to_vector_1_0, 0))
         self.connect((self.rational_resampler_xxx_2, 0), (self.blocks_float_to_uchar_0_0, 0))
         self.connect((self.rational_resampler_xxx_3, 0), (self.blocks_multiply_const_vxx_7_0, 0))
+        self.connect((self.rational_resampler_xxx_3_0, 0), (self.blocks_add_const_vxx_4, 0))
 
 
     def closeEvent(self, event):
@@ -712,8 +705,6 @@ class vtr(gr.top_block, Qt.QWidget):
     def set_Fh(self, Fh):
         self.Fh = Fh
         self.set_fh_comb_delay(self.samp_rate/(self.Fh*8))
-        self.set_if_lo_reference_fc(40*self.Fh+(self.Fh/8))
-        self.set_luma_fm_carrier(self.Fh * (284-1/4) + self.Fh/625)
         self.set_one_line_samples(nearest.power(self.samp_rate/self.Fh,2))
         self.set_samples_per_line(self.in_rate/self.Fh)
         self.analog_agc2_xx_0.set_attack_rate(10/self.Fh)
@@ -747,11 +738,10 @@ class vtr(gr.top_block, Qt.QWidget):
         self.band_reject_filter_0.set_taps(firdes.band_reject(1, self.samp_rate, self.luma_fm_carrier - 100e3, self.luma_fm_carrier + 100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.blocks_delay_1.set_dly(round(self.samp_rate / self.FM_HPF))
         self.blocks_moving_average_xx_0_2.set_length_and_scale(round(self.samp_rate /  self.FM_HPF), 1/round(self.samp_rate / self.FM_HPF))
-        self.high_pass_filter_0.set_taps(firdes.high_pass(0.1, self.samp_rate, 10e6, 2e6, firdes.WIN_KAISER, 14))
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
+        self.freq_xlating_fir_filter_xxx_0.set_taps(firdes.low_pass(1.0,self.samp_rate,4200000,1e6))
+        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, 3500000, 1e6, firdes.WIN_KAISER, 14))
         self.high_pass_filter_2.set_taps(firdes.high_pass(self.comb_gain, self.samp_rate, self.luma_fm_carrier, 1e6, firdes.WIN_HAMMING, 6.76))
-        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_KAISER, 14))
-        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_KAISER, 14))
+        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 6200000, 1e6, firdes.WIN_KAISER, 14))
         self.low_pass_filter_2.set_taps(firdes.low_pass(1, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.low_pass_filter_2_0.set_taps(firdes.low_pass(self.sharpener, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.qtgui_freq_sink_x_0_0_0.set_frequency_range(0, self.samp_rate)
@@ -766,7 +756,7 @@ class vtr(gr.top_block, Qt.QWidget):
         self.luma_fm_carrier = luma_fm_carrier
         self.set_comb_delay(self.samp_rate/(self.luma_fm_carrier*4))
         self.band_reject_filter_0.set_taps(firdes.band_reject(1, self.samp_rate, self.luma_fm_carrier - 100e3, self.luma_fm_carrier + 100e3, 100e3, firdes.WIN_HAMMING, 6.76))
-        self.freq_xlating_fir_filter_xxx_0.set_center_freq(self.luma_fm_carrier)
+        self.freq_xlating_fir_filter_xxx_0.set_center_freq(self.luma_fm_carrier+ self.luma_coarse)
         self.high_pass_filter_2.set_taps(firdes.high_pass(self.comb_gain, self.samp_rate, self.luma_fm_carrier, 1e6, firdes.WIN_HAMMING, 6.76))
         self.low_pass_filter_2.set_taps(firdes.low_pass(1, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
         self.low_pass_filter_2_0.set_taps(firdes.low_pass(self.sharpener, self.samp_rate, self.luma_fm_carrier-100e3, 100e3, firdes.WIN_HAMMING, 6.76))
@@ -839,8 +829,13 @@ class vtr(gr.top_block, Qt.QWidget):
 
     def set_luma_fm_carrier_filter_peak(self, luma_fm_carrier_filter_peak):
         self.luma_fm_carrier_filter_peak = luma_fm_carrier_filter_peak
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
-        self.low_pass_filter_1.set_taps(firdes.low_pass(1, self.samp_rate, 8e6, 8e6-self.luma_fm_carrier_filter_peak, firdes.WIN_KAISER, 14))
+
+    def get_luma_coarse(self):
+        return self.luma_coarse
+
+    def set_luma_coarse(self, luma_coarse):
+        self.luma_coarse = luma_coarse
+        self.freq_xlating_fir_filter_xxx_0.set_center_freq(self.luma_fm_carrier+ self.luma_coarse)
 
     def get_lines_per_field(self):
         return self.lines_per_field
@@ -901,8 +896,6 @@ class vtr(gr.top_block, Qt.QWidget):
 
     def set_chroma_adjusted(self, chroma_adjusted):
         self.chroma_adjusted = chroma_adjusted
-        self.high_pass_filter_1.set_taps(firdes.high_pass(1, self.samp_rate, self.chroma_adjusted, self.luma_fm_carrier_filter_peak-self.chroma_adjusted, firdes.WIN_KAISER, 14))
-        self.low_pass_filter_0.set_taps(firdes.low_pass(0.2, self.samp_rate, 200e3, self.chroma_adjusted - 375e3, firdes.WIN_KAISER, 14))
 
     def get_brightness(self):
         return self.brightness
@@ -944,6 +937,12 @@ class vtr(gr.top_block, Qt.QWidget):
         self.FM_HPF = FM_HPF
         self.blocks_delay_1.set_dly(round(self.samp_rate / self.FM_HPF))
         self.blocks_moving_average_xx_0_2.set_length_and_scale(round(self.samp_rate /  self.FM_HPF), 1/round(self.samp_rate / self.FM_HPF))
+
+    def get_DD_rate(self):
+        return self.DD_rate
+
+    def set_DD_rate(self, DD_rate):
+        self.DD_rate = DD_rate
 
 
 
